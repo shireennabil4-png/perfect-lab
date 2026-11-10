@@ -2,8 +2,8 @@
 // To add a page: add it to NAV and put <body data-page="key"> in the page.
 const NAV={
  main:[["index.html","الرئيسية","home"]],
- services:[["services.html","التحاليل","services"],["home-collection.html","زيارة منزلية","home-collection"],["offers.html","العروض","offers"],["prepare.html","التحضير للتحليل","prepare"],["contact.html","الروشتة","rx"],["branches.html","الفروع","branches"]],
- after:[["about.html","عن برفكت","about"],["faq.html","الأسئلة الشائعة","faq"],["contact.html","اتصل بنا","contact"]]
+ services:[["services.html","التحاليل","services"],["offers.html","العروض","offers"],["prepare.html","التحضير للتحليل","prepare"],["faq.html","الأسئلة الشائعة","faq"],["contact.html","الروشتة","rx"],["contact.html","اتصل بنا","contact"]],
+ after:[["branches.html","الفروع","branches"],["home-collection.html","الزيارة المنزلية","home-collection"],["about.html","عن برفكت","about"]]
 };
 const PAGE=document.body.dataset.page||"";
 // Old one-page links (index.html#faq) go to the new page
@@ -11,8 +11,19 @@ const OLD={"#about":"about.html","#services":"services.html","#home-collection":
 if(PAGE==="home"&&OLD[location.hash])location.replace(OLD[location.hash]);
 const navA=([h,t,p])=>`<a class="nb${p===PAGE?" active":""}" href="${h}"${p===PAGE?' aria-current="page"':""}>${t}</a>`;
 const svcActive=NAV.services.some(x=>x[2]===PAGE);
-document.getElementById("site-header").outerHTML=`<header><div class="wrap bar">
-<a class="brand" href="index.html"><img class="logo" src="assets/logo.png" alt="برفكت لاب" width="45" height="56"></a>
+document.getElementById("site-header").outerHTML=`<header>
+<div class="wrap bar">
+<a class="brand" href="index.html" aria-label="Perfect Lab – معامل برفكت لاب"><img class="logo" src="assets/logo.png" alt="" width="45" height="56">
+<span class="bname"><span class="bar-ar" lang="ar">معامل برفكت لاب</span><span class="bar-en" lang="en">PERFECT LAB</span></span></a>
+<div class="tools">
+<a class="nb login" href="login.html">تسجيل الدخول</a>
+<button class="ib" id="cart" type="button" aria-label="السلة" title="السلة"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3.5h2.8l2.4 11.2a1 1 0 0 0 1 .8h9.1a1 1 0 0 0 1-.8l1.5-7.4H6.2"/></svg></button>
+<button class="ib" id="bell" type="button" aria-label="الإشعارات" title="الإشعارات"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5.5 2 6.8 2 6.8H4S6 14.5 6 9z"/><path d="M10 19.5a2.2 2.2 0 0 0 4 0"/></svg></button>
+<button class="lang" id="lang" type="button" aria-label="Change language / تغيير اللغة">عربي</button>
+<button class="menu" id="menu" aria-label="القائمة" aria-expanded="false">☰</button>
+</div>
+</div>
+<div class="navbar"><div class="wrap">
 <nav id="nav">
 ${NAV.main.map(navA).join("")}
 <div class="dd" id="dd">
@@ -21,14 +32,8 @@ ${NAV.main.map(navA).join("")}
 <div class="dd-m" id="ddm">${NAV.services.map(([h,t,p])=>`<a href="${h}"${p===PAGE?' class="cur" aria-current="page"':""}>${t}</a>`).join("")}</div></div>
 ${NAV.after.map(navA).join("")}
 </nav>
-<div class="tools">
-<a class="nb login" href="login.html">تسجيل الدخول</a>
-<button class="ib" id="cart" type="button" aria-label="السلة" title="السلة"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3.5h2.8l2.4 11.2a1 1 0 0 0 1 .8h9.1a1 1 0 0 0 1-.8l1.5-7.4H6.2"/></svg></button>
-<button class="ib" id="bell" type="button" aria-label="الإشعارات" title="الإشعارات"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5.5 2 6.8 2 6.8H4S6 14.5 6 9z"/><path d="M10 19.5a2.2 2.2 0 0 0 4 0"/></svg></button>
-<button class="lang" id="lang" type="button" aria-label="Change language / تغيير اللغة">عربي</button>
-</div>
-<button class="menu" id="menu" aria-label="القائمة" aria-expanded="false">☰</button>
-</div></header>`;
+</div></div>
+</header>`;
 document.getElementById("site-footer").outerHTML=`<footer><div class="wrap">
 <div class="fg">
 <div><h3>🔬 برفكت لاب</h3><p>مختبر تحاليل طبية تحت إدارة د. أحمد فكري.</p></div>
@@ -164,7 +169,7 @@ Object.assign(EN,{
 "احجز أو استفسر عن تحليل.":"Book or ask about a test.","تعرف على المعمل ورسالته.":"Learn about the lab and its mission.",
 "عرض التفاصيل":"View details","احجز الآن":"Book now","هل لديك سؤال آخر؟":"Have another question?","تواصل معنا وسيرد عليك فريقنا في أقرب وقت.":"Contact us and our team will get back to you soon.",
 "جاهز تحجز تحليلك؟":"Ready to book your test?","احجز من الفرع أو اطلب سحب العينة من المنزل.":"Book at a branch or request home sample collection.",
-"في ملف":"in the file","الصفحة غير موجودة":"Page not found","الرابط الذي فتحته غير متاح. ارجع للصفحة الرئيسية.":"The link you opened is not available. Go back to the home page.","العودة للرئيسية":"Back to home"
+"في ملف":"in the file","الصفحة غير موجودة":"Page not found","الرابط الذي فتحته غير متاح. ارجع للصفحة الرئيسية.":"The link you opened is not available. Go back to the home page.","العودة للرئيسية":"Back to home","الزيارة المنزلية":"Home Visit","عن برفكت":"About Perfect Lab"
 });
 const TITLE={ar:document.body.dataset.titleAr||document.title,en:document.title};
 const tr=[];
