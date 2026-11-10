@@ -6,7 +6,8 @@ const CONFIG={
  social:{"فيسبوك":"https://www.facebook.com/Perfectlabs1"},
  branches:[ // أضف: address, phone, hours, map — و lat/lng = مكان الفرع على الخريطة (الحالي تقريبي حسب المنطقة)
   {n:"التبين",en:"El Tebbin",lat:29.7900,lng:31.3000},
-  {n:"حلوان",en:"Helwan",lat:29.8500,lng:31.3340},
+  {n:"حلوان 1",en:"Helwan 1",lat:29.8479,lng:31.3338,address:"شارع محمد سيد أحمد، حلوان",address_en:"Mohamed Sayed Ahmed St., Helwan"},
+  {n:"حلوان 2",en:"Helwan 2",lat:29.8430,lng:31.3390,address:"شارع شريف، حلوان",address_en:"Sherif St., Helwan"},
   {n:"حدائق حلوان",en:"Hadayek Helwan",lat:29.8697,lng:31.3205,address:"أمام محطة مترو حدائق حلوان",address_en:"In front of Hadayek Helwan metro station"},
   {n:"الدواجن",en:"El Dawagen",lat:29.8760,lng:31.3000},
   {n:"المعصرة",en:"El Maasara",lat:29.9060,lng:31.2995},
