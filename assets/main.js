@@ -78,7 +78,7 @@ const onLang=[];
 // ===== Home: full-width videos that play one after another =====
 const stage=$(".stage");
 if(stage&&VLIST.length){
- const v=stage.querySelector(".st-v"),bg=stage.querySelector(".st-bg"),tabs=$("#st-tabs"),ICON={lab:"🔬",tests:"🧪",home:"🏠",branches:"📍"};
+ const v=stage.querySelector(".st-v"),tabs=$("#st-tabs"),ICON={lab:"🔬",tests:"🧪",home:"🏠",branches:"📍"};
  const SOON=6000;let i=0,timer=null,paused=false,muted=true,t0=0;
  // stage height = visible screen under the header
  const fitH=()=>document.documentElement.style.setProperty("--hh",document.querySelector("header").offsetHeight+"px");
@@ -88,16 +88,14 @@ if(stage&&VLIST.length){
   tabs.innerHTML=VLIST.map((y,k)=>`<button type="button" role="tab" aria-selected="${k===i}" class="st-tab${k===i?" on":""}" data-k="${k}"><span class="sbar"><i></i></span>${esc(T(y.title))}</button>`).join("")};
  const bar=p=>{const el=tabs.querySelector(".st-tab.on i");if(el)el.style.width=Math.min(100,p*100)+"%"};
  const next=()=>go((i+1)%VLIST.length);
- function soon(){stage.classList.remove("ready");$("#st-icon").textContent=ICON[VLIST[i].key]||"🎬";clearInterval(timer);t0=Date.now();
+ function soon(){stage.classList.add("soon");$("#st-icon").textContent=ICON[VLIST[i].key]||"🎬";clearInterval(timer);t0=Date.now();
   timer=setInterval(()=>{if(paused){t0+=250;return}const p=(Date.now()-t0)/SOON;bar(p);if(p>=1)next()},250)}
  function go(k){
   i=k;clearInterval(timer);cap();const x=VLIST[i];
-  stage.classList.remove("ready","tall");v.src=x.src;bg.src=x.src;v.muted=muted;
+  stage.classList.remove("ready","soon");v.src=x.src;v.muted=muted;
   if(!paused){v.play().catch(()=>{});}
  }
- const fitMode=()=>{if(!v.videoWidth)return;const va=v.videoWidth/v.videoHeight,sa=stage.clientWidth/stage.clientHeight;stage.classList.toggle("tall",Math.max(va/sa,sa/va)>1.35)};
- addEventListener("resize",fitMode);
- v.addEventListener("loadedmetadata",()=>{stage.classList.add("ready");fitMode();if(stage.classList.contains("tall")&&!paused)bg.play().catch(()=>{})});
+ v.addEventListener("loadedmetadata",()=>{stage.classList.add("ready")});
  v.addEventListener("error",soon);
  v.addEventListener("timeupdate",()=>{if(v.duration)bar(v.currentTime/v.duration)});
  v.addEventListener("ended",next);
@@ -111,7 +109,7 @@ if(stage&&VLIST.length){
  const pb=$("#st-play"),sb=$("#st-sound");
  const arrowsUi=()=>{$("#st-prev").setAttribute("aria-label",T("الفيديو السابق"));$("#st-next").setAttribute("aria-label",T("الفيديو التالي"))};
  const ui=()=>{arrowsUi();pb.textContent=paused?"▶":"❚❚";pb.setAttribute("aria-label",T(paused?"تشغيل":"إيقاف مؤقت"));sb.textContent=muted?"🔇":"🔊";sb.setAttribute("aria-label",T(muted?"تشغيل الصوت":"كتم الصوت"))};
- pb.onclick=()=>{paused=!paused;if(stage.classList.contains("ready")){if(paused){v.pause();bg.pause()}else{v.play().catch(()=>{});if(stage.classList.contains("tall"))bg.play().catch(()=>{})}}ui()};
+ pb.onclick=()=>{paused=!paused;if(paused)v.pause();else v.play().catch(()=>{});ui()};
  sb.onclick=()=>{muted=!muted;v.muted=muted;if(!muted&&paused){paused=false;v.play().catch(()=>{})}ui()};
  // pause when the stage is scrolled out of view (saves data/battery)
  if("IntersectionObserver"in window)new IntersectionObserver(([e])=>{if(!stage.classList.contains("ready")||paused)return;e.isIntersecting?v.play().catch(()=>{}):v.pause()}).observe(stage);
