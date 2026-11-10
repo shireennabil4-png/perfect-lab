@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Contact Us – Perfect Lab</title>
+<meta name="description" content="Contact Perfect Lab to book or ask about a test.">
+<link rel="icon" href="assets/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="contact" data-title-ar="اتصل بنا – برفكت لاب">
+<div id="site-header"></div>
+<main>
+<section class="phead"><div class="wrap">
+<div class="crumb"><a href="index.html">الرئيسية</a> ‹ <span>اتصل بنا</span></div>
+<h1>اتصل بنا</h1><p>احجز أو استفسر عن تحليل.</p>
+</div></section>
+<section><div class="wrap cgrid">
+<div class="info">
+<h2>بيانات الاتصال</h2>
+<p><b>الهاتف:</b> <span id="c-phone"></span></p>
+<p><b>واتساب:</b> <span id="c-wa"></span></p>
+<p><b>البريد:</b> <span id="c-mail"></span></p>
+<p><b>ساعات العمل:</b> <span id="c-hours"></span></p>
+<p><b>التواصل الاجتماعي:</b> <span id="c-soc"></span></p>
+</div>
+<div class="card">
+<form id="f" novalidate>
+<label>اسم المريض<input name="name" required autocomplete="name"><span class="err"></span></label>
+<label>رقم الهاتف<input name="phone" type="tel" required autocomplete="tel" inputmode="tel"><span class="err"></span></label>
+<label>التحليل أو الخدمة المطلوبة<input name="test" required><span class="err"></span></label>
+<div class="two">
+<label>الفرع المفضل<select name="branch" id="bsel"><option>سحب عينة من المنزل</option></select></label>
+<label>التاريخ المفضل<input name="date" type="date"></label></div>
+<label>ملاحظات إضافية<textarea name="notes" rows="3"></textarea></label>
+<label class="chk"><input type="checkbox" name="ok" required><span>أوافق على استخدام بياناتي للتواصل معي بخصوص طلبي فقط. لا يُطلب منك إدخال معلومات طبية غير ضرورية.</span></label><span class="err" id="e-ok"></span>
+<button class="btn" type="submit">إرسال الطلب</button>
+<div id="msg" role="status"></div>
+</form></div></div></section>
+</main>
+<div id="site-footer"></div>
+<script src="assets/config.js"></script>
+<script src="assets/main.js"></script>
+</body>
+</html>
