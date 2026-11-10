@@ -56,7 +56,7 @@ fill("#br",C.branches.map(b=>`<div class="card"><span class="ic">📍</span><h3>
 if($("#bsel"))$("#bsel").innerHTML+=C.branches.map(b=>`<option>فرع ${esc(b.n)}</option>`).join("");
 fill("#faqs",C.faq.map(f=>`<details><summary>${esc(f[0])}</summary><p>${esc(f[1])}</p></details>`).join(""));
 fill("#c-phone",C.phone?`<a href="tel:${esc(C.phone)}">${esc(C.phone)}</a>`:tbd);
-fill("#c-wa",C.whatsapp?`<a href="https://wa.me/${esc(C.whatsapp)}">${esc(C.whatsapp)}</a>`:tbd);
+fill("#c-wa",C.whatsapp?`<a href="https://wa.me/${esc(C.whatsapp)}" target="_blank" rel="noopener" dir="ltr">${esc(C.whatsapp.replace(/^20/,"0"))}</a>`:tbd);
 fill("#c-mail",C.email?`<a href="mailto:${esc(C.email)}">${esc(C.email)}</a>`:tbd);
 if($("#c-hours"))$("#c-hours").textContent=C.hours||tbd;
 fill("#c-soc",Object.keys(C.social).length?Object.entries(C.social).map(([k,v])=>`<a href="${esc(v)}" target="_blank" rel="noopener">${esc(k)}</a>`).join(" · "):tbd);
@@ -129,6 +129,7 @@ if(mapEl&&listEl){
  const css=document.createElement("link");css.rel="stylesheet";css.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";document.head.appendChild(css);
  const sc=document.createElement("script");sc.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
  sc.onload=()=>{
+  if(!window.L||!L.map){sc.onerror();return}
   mapEl.innerHTML="";
   map=L.map(mapEl,{scrollWheelZoom:false});
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
