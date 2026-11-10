@@ -63,6 +63,47 @@ fill("#c-soc",Object.keys(C.social).length?Object.entries(C.social).map(([k,v])=
 document.querySelectorAll("[data-wa]").forEach(a=>{if(C.whatsapp){a.href="https://wa.me/"+C.whatsapp;a.target="_blank";a.rel="noopener"}});
 $("#yr").textContent=new Date().getFullYear();
 
+// ===== Videos: show "coming soon" until the file is uploaded =====
+document.querySelectorAll("video[data-vid]").forEach(v=>{
+ const box=v.closest(".vbox"),src=(typeof VIDEOS!=="undefined"&&VIDEOS[v.dataset.vid])||"";
+ if(!src)return;
+ v.addEventListener("loadedmetadata",()=>box.classList.add("ready"));
+ v.addEventListener("error",()=>box.classList.remove("ready"));
+ v.src=src;
+});
+
+// ===== Branches map (Leaflet + OpenStreetMap) =====
+const onLang=[];
+const mapEl=$("#br-map"),listEl=$("#br-list");
+if(mapEl&&listEl){
+ const BR=C.branches.filter(b=>b.lat&&b.lng);let map=null,marks=[];
+ const isEn=()=>document.documentElement.lang==="en";
+ const bName=b=>isEn()?`${b.en||b.n} Branch`:`فرع ${b.n}`;
+ const bDesc=b=>b.address?b.address:(isEn()?`Serves the ${b.en||b.n} area and nearby. Full address will be added once verified.`:`يخدم منطقة ${b.n} وما حولها. العنوان التفصيلي يُضاف بعد التحقق.`);
+ const pop=b=>`<div class="pop"><b>${esc(bName(b))}</b><p>${esc(bDesc(b))}</p>${b.phone?`<p><a href="tel:${esc(b.phone)}">${esc(b.phone)}</a></p>`:""}${b.hours?`<p>${esc(b.hours)}</p>`:""}<p><a href="${esc(b.map||`https://www.google.com/maps/search/?api=1&query=${b.lat},${b.lng}`)}" target="_blank" rel="noopener">${isEn()?"Open in Google Maps":"افتح في خرائط جوجل"}</a></p></div>`;
+ const renderList=()=>{
+  listEl.innerHTML=BR.map((b,i)=>`<li><button type="button" data-i="${i}"><span class="pinmini" aria-hidden="true"></span><span><b>${esc(bName(b))}</b><small>${esc(bDesc(b))}</small></span></button></li>`).join("");
+  marks.forEach((m,i)=>m.setPopupContent(pop(BR[i])));
+ };
+ listEl.addEventListener("click",e=>{const btn=e.target.closest("button[data-i]");if(!btn)return;const i=+btn.dataset.i;
+  listEl.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===btn));
+  if(map){map.flyTo([BR[i].lat,BR[i].lng],14,{duration:.8});marks[i].openPopup();mapEl.scrollIntoView({behavior:"smooth",block:"nearest"})}
+  else window.open(`https://www.google.com/maps/search/?api=1&query=${BR[i].lat},${BR[i].lng}`,"_blank","noopener")});
+ renderList();onLang.push(renderList);
+ const css=document.createElement("link");css.rel="stylesheet";css.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";document.head.appendChild(css);
+ const sc=document.createElement("script");sc.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+ sc.onload=()=>{
+  mapEl.innerHTML="";
+  map=L.map(mapEl,{scrollWheelZoom:false});
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
+  const icon=L.divIcon({className:"pinwrap",html:'<span class="pin"></span>',iconSize:[30,40],iconAnchor:[15,40],popupAnchor:[0,-36]});
+  marks=BR.map(b=>L.marker([b.lat,b.lng],{icon,title:b.en||b.n}).addTo(map).bindPopup(pop(b)));
+  map.fitBounds(L.latLngBounds(BR.map(b=>[b.lat,b.lng])),{padding:[30,30]});
+ };
+ sc.onerror=()=>{mapEl.innerHTML=`<div class="mapload">${isEn()?"The map could not be loaded. Tap a branch to open it in Google Maps.":"تعذر تحميل الخريطة. اضغط على أي فرع لفتحه في خرائط جوجل."}</div>`};
+ document.head.appendChild(sc);
+}
+
 // ===== Mobile menu & services dropdown =====
 const nav=$("#nav"),mb=$("#menu");
 mb.onclick=()=>{const o=nav.classList.toggle("open");mb.setAttribute("aria-expanded",o)};
@@ -77,17 +118,17 @@ const form=$("#f");
 if(form)form.addEventListener("submit",e=>{
  e.preventDefault();const f=e.target,d=Object.fromEntries(new FormData(f));let ok=true;
  const set=(n,m)=>{f[n].parentElement.querySelector(".err").textContent=m;if(m)ok=false};
- set("name",d.name.trim().length<3?L("يرجى إدخال الاسم."):"");
- set("phone",/^[+\d\s-]{8,16}$/.test(d.phone.trim())?"":L("يرجى إدخال رقم هاتف صحيح."));
- set("test",d.test.trim()?"":L("يرجى تحديد التحليل أو الخدمة."));
- $("#e-ok").textContent=f.ok.checked?"":L("الموافقة مطلوبة للمتابعة.");if(!f.ok.checked)ok=false;
+ set("name",d.name.trim().length<3?T("يرجى إدخال الاسم."):"");
+ set("phone",/^[+\d\s-]{8,16}$/.test(d.phone.trim())?"":T("يرجى إدخال رقم هاتف صحيح."));
+ set("test",d.test.trim()?"":T("يرجى تحديد التحليل أو الخدمة."));
+ $("#e-ok").textContent=f.ok.checked?"":T("الموافقة مطلوبة للمتابعة.");if(!f.ok.checked)ok=false;
  if(!ok)return;
  const m=$("#msg");m.style.display="block";
  if(C.whatsapp){
   const t=`طلب جديد\nالاسم: ${d.name}\nالهاتف: ${d.phone}\nالخدمة: ${d.test}\nالفرع: ${d.branch}\nالتاريخ: ${d.date||"-"}\nملاحظات: ${d.notes||"-"}`;
   window.open("https://wa.me/"+C.whatsapp+"?text="+encodeURIComponent(t),"_blank");
-  m.textContent=L("تم تجهيز طلبك في واتساب؛ أرسل الرسالة لإتمام الطلب. سيؤكد المعمل الموعد معك.");
- }else m.textContent=L("هذا نموذج تجريبي: لم يتم إرسال أي بيانات ولا يوجد حجز. أضف رقم واتساب في CONFIG أو اربط خدمة استقبال فعلية.");
+  m.textContent=T("تم تجهيز طلبك في واتساب؛ أرسل الرسالة لإتمام الطلب. سيؤكد المعمل الموعد معك.");
+ }else m.textContent=T("هذا نموذج تجريبي: لم يتم إرسال أي بيانات ولا يوجد حجز. أضف رقم واتساب في CONFIG أو اربط خدمة استقبال فعلية.");
 });
 
 // ===== Language: English by default, Arabic button =====
@@ -169,14 +210,20 @@ Object.assign(EN,{
 "احجز أو استفسر عن تحليل.":"Book or ask about a test.","تعرف على المعمل ورسالته.":"Learn about the lab and its mission.",
 "عرض التفاصيل":"View details","احجز الآن":"Book now","هل لديك سؤال آخر؟":"Have another question?","تواصل معنا وسيرد عليك فريقنا في أقرب وقت.":"Contact us and our team will get back to you soon.",
 "جاهز تحجز تحليلك؟":"Ready to book your test?","احجز من الفرع أو اطلب سحب العينة من المنزل.":"Book at a branch or request home sample collection.",
-"في ملف":"in the file","الصفحة غير موجودة":"Page not found","الرابط الذي فتحته غير متاح. ارجع للصفحة الرئيسية.":"The link you opened is not available. Go back to the home page.","العودة للرئيسية":"Back to home","الزيارة المنزلية":"Home Visit","عن برفكت":"About Perfect Lab"
+"في ملف":"in the file","الصفحة غير موجودة":"Page not found","الرابط الذي فتحته غير متاح. ارجع للصفحة الرئيسية.":"The link you opened is not available. Go back to the home page.","العودة للرئيسية":"Back to home","الزيارة المنزلية":"Home Visit","شاهد معامل برفكت لاب":"Take a look inside Perfect Lab","الفيديو سيُضاف قريبًا":"Video coming soon",
+"المعمل والأجهزة":"The lab and equipment","جولة داخل معمل برفكت لاب والأجهزة المستخدمة في التحاليل.":"A tour inside Perfect Lab and the equipment used for testing.",
+"التحاليل والزيارات المنزلية":"Tests and home visits","تعرف على التحاليل المتاحة وطريقة طلب سحب العينة من المنزل.":"Learn about the available tests and how to request home sample collection.",
+"فروعنا":"Our branches","تعرف على فروع برفكت لاب وأماكنها.":"Get to know Perfect Lab branches and where they are.",
+"فيديو المعمل والأجهزة":"Lab and equipment video","فيديو التحاليل والزيارات المنزلية":"Tests and home visits video",
+"فروعنا على الخريطة":"Our branches on the map","اضغط على أي فرع لعرض مكانه على الخريطة.":"Tap any branch to see where it is on the map.","خريطة فروع برفكت لاب":"Perfect Lab branches map","جاري تحميل الخريطة…":"Loading map…",
+"أماكن الفروع على الخريطة تقريبية حسب المنطقة لحين إضافة العناوين الدقيقة.":"Branch locations on the map are approximate by area until exact addresses are added.","عن برفكت":"About Perfect Lab"
 });
 const TITLE={ar:document.body.dataset.titleAr||document.title,en:document.title};
 const tr=[];
 const tw=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let tn;
 while(tn=tw.nextNode()){const raw=tn.textContent,t=raw.trim();if(t&&EN[t]){const i=raw.indexOf(t);tr.push([tn,raw,raw.slice(0,i)+EN[t]+raw.slice(i+t.length)])}}
 const tra=[];document.querySelectorAll("[alt],[aria-label]").forEach(el=>["alt","aria-label"].forEach(a=>{const v=el.getAttribute(a);if(v&&EN[v])tra.push([el,a,v,EN[v]])}));
-const L=ar=>document.documentElement.lang==="en"&&EN[ar]?EN[ar]:ar;
+const T=ar=>document.documentElement.lang==="en"&&EN[ar]?EN[ar]:ar;
 const lb=$("#lang");
 function setLang(l){
  const en=l==="en";
@@ -187,6 +234,7 @@ function setLang(l){
  lb.textContent=en?"عربي":"English";
  [["#cart","Cart","السلة"],["#ddbtn","Show services menu","عرض قائمة الخدمات"],["#bell","Notifications","الإشعارات"]].forEach(([q,e,a])=>{const b=$(q),t=en?e:a;b.setAttribute("aria-label",t);b.title=t});
  try{localStorage.setItem("lang",l)}catch(e){}
+ onLang.forEach(f=>f());
 }
 lb.onclick=()=>setLang(document.documentElement.lang==="ar"?"en":"ar");
 let saved=null;try{saved=localStorage.getItem("lang")}catch(e){}
