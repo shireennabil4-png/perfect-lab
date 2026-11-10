@@ -78,7 +78,7 @@ const onLang=[];
 // ===== Home: full-width videos that play one after another =====
 const stage=$(".stage");
 if(stage&&VLIST.length){
- const v=stage.querySelector(".st-v"),bg=stage.querySelector(".st-bg"),tabs=$("#st-tabs"),ICON={lab:"🔬",tests:"🧪",branches:"📍"};
+ const v=stage.querySelector(".st-v"),bg=stage.querySelector(".st-bg"),tabs=$("#st-tabs"),ICON={lab:"🔬",tests:"🧪",home:"🏠",branches:"📍"};
  const SOON=6000;let i=0,timer=null,paused=false,muted=true,t0=0;
  // stage height = visible screen under the header
  const fitH=()=>document.documentElement.style.setProperty("--hh",document.querySelector("header").offsetHeight+"px");
@@ -102,8 +102,15 @@ if(stage&&VLIST.length){
  v.addEventListener("timeupdate",()=>{if(v.duration)bar(v.currentTime/v.duration)});
  v.addEventListener("ended",next);
  tabs.addEventListener("click",e=>{const b=e.target.closest(".st-tab");if(b)go(+b.dataset.k)});
+ const prev=()=>go((i-1+VLIST.length)%VLIST.length);
+ $("#st-prev").onclick=prev;$("#st-next").onclick=next;
+ stage.tabIndex=-1;stage.addEventListener("keydown",e=>{const rtl=document.dir==="rtl";if(e.key==="ArrowRight")(rtl?prev:next)();if(e.key==="ArrowLeft")(rtl?next:prev)()});
+ // swipe on phones
+ let sx=null;stage.addEventListener("touchstart",e=>{sx=e.touches[0].clientX},{passive:true});
+ stage.addEventListener("touchend",e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(dx)<50)return;const rtl=document.dir==="rtl";(dx<0)!==rtl?next():prev()},{passive:true});
  const pb=$("#st-play"),sb=$("#st-sound");
- const ui=()=>{pb.textContent=paused?"▶":"❚❚";pb.setAttribute("aria-label",T(paused?"تشغيل":"إيقاف مؤقت"));sb.textContent=muted?"🔇":"🔊";sb.setAttribute("aria-label",T(muted?"تشغيل الصوت":"كتم الصوت"))};
+ const arrowsUi=()=>{$("#st-prev").setAttribute("aria-label",T("الفيديو السابق"));$("#st-next").setAttribute("aria-label",T("الفيديو التالي"))};
+ const ui=()=>{arrowsUi();pb.textContent=paused?"▶":"❚❚";pb.setAttribute("aria-label",T(paused?"تشغيل":"إيقاف مؤقت"));sb.textContent=muted?"🔇":"🔊";sb.setAttribute("aria-label",T(muted?"تشغيل الصوت":"كتم الصوت"))};
  pb.onclick=()=>{paused=!paused;if(stage.classList.contains("ready")){if(paused){v.pause();bg.pause()}else{v.play().catch(()=>{});if(stage.classList.contains("tall"))bg.play().catch(()=>{})}}ui()};
  sb.onclick=()=>{muted=!muted;v.muted=muted;if(!muted&&paused){paused=false;v.play().catch(()=>{})}ui()};
  // pause when the stage is scrolled out of view (saves data/battery)
@@ -252,7 +259,7 @@ Object.assign(EN,{
 "احجز أو استفسر عن تحليل.":"Book or ask about a test.","تعرف على المعمل ورسالته.":"Learn about the lab and its mission.",
 "عرض التفاصيل":"View details","احجز الآن":"Book now","هل لديك سؤال آخر؟":"Have another question?","تواصل معنا وسيرد عليك فريقنا في أقرب وقت.":"Contact us and our team will get back to you soon.",
 "جاهز تحجز تحليلك؟":"Ready to book your test?","احجز من الفرع أو اطلب سحب العينة من المنزل.":"Book at a branch or request home sample collection.",
-"في ملف":"in the file","الصفحة غير موجودة":"Page not found","الرابط الذي فتحته غير متاح. ارجع للصفحة الرئيسية.":"The link you opened is not available. Go back to the home page.","العودة للرئيسية":"Back to home","الزيارة المنزلية":"Home Visit","من 9 صباحًا إلى 11 مساءً":"9:00 AM to 11:00 PM","فيسبوك":"Facebook","فيديوهات معامل برفكت لاب":"Perfect Lab videos","إيقاف مؤقت":"Pause","تشغيل":"Play","تشغيل الصوت":"Turn sound on","كتم الصوت":"Mute","شاهد معامل برفكت لاب":"Take a look inside Perfect Lab","الفيديو سيُضاف قريبًا":"Video coming soon",
+"في ملف":"in the file","الصفحة غير موجودة":"Page not found","الرابط الذي فتحته غير متاح. ارجع للصفحة الرئيسية.":"The link you opened is not available. Go back to the home page.","العودة للرئيسية":"Back to home","الزيارة المنزلية":"Home Visit","التحاليل المتوفرة":"Available tests","كل التحاليل المتوفرة عندنا مصنفة حسب النوع.":"All the tests we offer, grouped by type.","دكتور من برفكت لاب بييجي لحد بيتك يسحب العينة.":"A Perfect Lab specialist comes to your home to collect the sample.","الفيديو السابق":"Previous video","الفيديو التالي":"Next video","من 9 صباحًا إلى 11 مساءً":"9:00 AM to 11:00 PM","فيسبوك":"Facebook","فيديوهات معامل برفكت لاب":"Perfect Lab videos","إيقاف مؤقت":"Pause","تشغيل":"Play","تشغيل الصوت":"Turn sound on","كتم الصوت":"Mute","شاهد معامل برفكت لاب":"Take a look inside Perfect Lab","الفيديو سيُضاف قريبًا":"Video coming soon",
 "المعمل والأجهزة":"The lab and equipment","جولة داخل معمل برفكت لاب والأجهزة المستخدمة في التحاليل.":"A tour inside Perfect Lab and the equipment used for testing.",
 "التحاليل والزيارات المنزلية":"Tests and home visits","تعرف على التحاليل المتاحة وطريقة طلب سحب العينة من المنزل.":"Learn about the available tests and how to request home sample collection.",
 "فروعنا":"Our branches","تعرف على فروع برفكت لاب وأماكنها.":"Get to know Perfect Lab branches and where they are.",
