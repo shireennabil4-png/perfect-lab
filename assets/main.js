@@ -56,7 +56,7 @@ fill("#off",C.offers.map(o=>`<div class="card"><span class="tag">${o.discount?es
 fill("#br",C.branches.map(b=>`<div class="card"><span class="ic">📍</span><h3>فرع ${esc(b.n)}</h3><p>${b.address?esc(b.address):"العنوان يُضاف بعد التحقق."}</p>${b.phone?`<p><a href="tel:${esc(b.phone)}">${esc(b.phone)}</a></p>`:""}${b.hours?`<p>${esc(b.hours)}</p>`:""}${b.map?`<p><a href="${esc(b.map)}" target="_blank" rel="noopener"><b>الاتجاهات على الخريطة</b></a></p>`:""}</div>`).join(""));
 if($("#bsel"))$("#bsel").innerHTML+=C.branches.map(b=>`<option>فرع ${esc(b.n)}</option>`).join("");
 fill("#faqs",C.faq.map(f=>`<details><summary>${esc(f[0])}</summary><p>${esc(f[1])}</p></details>`).join(""));
-fill("#c-phone",C.phone?`<a href="tel:${esc(C.phone)}">${esc(C.phone)}</a>`:tbd);
+fill("#c-phone",C.phone?`<a href="tel:${esc(C.phone.replace(/^0/,"+20"))}" dir="ltr">${esc(C.phone)}</a>`:tbd);
 fill("#c-wa",C.whatsapp?`<a href="https://wa.me/${esc(C.whatsapp)}" target="_blank" rel="noopener" dir="ltr">${esc(C.whatsapp.replace(/^20/,"0"))}</a>`:tbd);
 fill("#c-mail",C.email?`<a href="mailto:${esc(C.email)}">${esc(C.email)}</a>`:tbd);
 if($("#c-hours"))$("#c-hours").textContent=C.hours||tbd;
@@ -252,7 +252,7 @@ Object.assign(EN,{
 "احجز أو استفسر عن تحليل.":"Book or ask about a test.","تعرف على المعمل ورسالته.":"Learn about the lab and its mission.",
 "عرض التفاصيل":"View details","احجز الآن":"Book now","هل لديك سؤال آخر؟":"Have another question?","تواصل معنا وسيرد عليك فريقنا في أقرب وقت.":"Contact us and our team will get back to you soon.",
 "جاهز تحجز تحليلك؟":"Ready to book your test?","احجز من الفرع أو اطلب سحب العينة من المنزل.":"Book at a branch or request home sample collection.",
-"في ملف":"in the file","الصفحة غير موجودة":"Page not found","الرابط الذي فتحته غير متاح. ارجع للصفحة الرئيسية.":"The link you opened is not available. Go back to the home page.","العودة للرئيسية":"Back to home","الزيارة المنزلية":"Home Visit","فيديوهات معامل برفكت لاب":"Perfect Lab videos","إيقاف مؤقت":"Pause","تشغيل":"Play","تشغيل الصوت":"Turn sound on","كتم الصوت":"Mute","شاهد معامل برفكت لاب":"Take a look inside Perfect Lab","الفيديو سيُضاف قريبًا":"Video coming soon",
+"في ملف":"in the file","الصفحة غير موجودة":"Page not found","الرابط الذي فتحته غير متاح. ارجع للصفحة الرئيسية.":"The link you opened is not available. Go back to the home page.","العودة للرئيسية":"Back to home","الزيارة المنزلية":"Home Visit","من 9 صباحًا إلى 11 مساءً":"9:00 AM to 11:00 PM","فيسبوك":"Facebook","فيديوهات معامل برفكت لاب":"Perfect Lab videos","إيقاف مؤقت":"Pause","تشغيل":"Play","تشغيل الصوت":"Turn sound on","كتم الصوت":"Mute","شاهد معامل برفكت لاب":"Take a look inside Perfect Lab","الفيديو سيُضاف قريبًا":"Video coming soon",
 "المعمل والأجهزة":"The lab and equipment","جولة داخل معمل برفكت لاب والأجهزة المستخدمة في التحاليل.":"A tour inside Perfect Lab and the equipment used for testing.",
 "التحاليل والزيارات المنزلية":"Tests and home visits","تعرف على التحاليل المتاحة وطريقة طلب سحب العينة من المنزل.":"Learn about the available tests and how to request home sample collection.",
 "فروعنا":"Our branches","تعرف على فروع برفكت لاب وأماكنها.":"Get to know Perfect Lab branches and where they are.",
