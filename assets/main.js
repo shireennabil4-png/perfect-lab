@@ -2,14 +2,15 @@
 // To add a page: add it to NAV and put <body data-page="key"> in the page.
 const NAV={
  main:[["index.html","الرئيسية","home"]],
- services:[["services.html","التحاليل","services"],["offers.html","العروض","offers"],["prepare.html","التحضير للتحليل","prepare"],["faq.html","الأسئلة الشائعة","faq"],["contact.html","الروشتة","rx"],["contact.html","اتصل بنا","contact"]],
- after:[["branches.html","الفروع","branches"],["home-collection.html","الزيارة المنزلية","home-collection"],["about.html","عن برفكت","about"]]
+ services:[["services.html","التحاليل","services"],["offers.html","العروض","offers"],["prepare.html","التحضير للتحليل","prepare"],["faq.html","الأسئلة الشائعة","faq"],["contact.html","الروشتة","rx"]],
+ after:[["branches.html","الفروع","branches"],["home-collection.html","الزيارة المنزلية","home-collection"],["contact.html","اتصل بنا","contact","call"],["about.html","عن برفكت","about"]]
 };
 const PAGE=document.body.dataset.page||"";
 // Old one-page links (index.html#faq) go to the new page
 const OLD={"#about":"about.html","#services":"services.html","#home-collection":"home-collection.html","#offers":"offers.html","#branches":"branches.html","#prepare":"prepare.html","#faq":"faq.html","#contact":"contact.html"};
 if(PAGE==="home"&&OLD[location.hash])location.replace(OLD[location.hash]);
-const navA=([h,t,p])=>`<a class="nb${p===PAGE?" active":""}" href="${h}"${p===PAGE?' aria-current="page"':""}>${t}</a>`;
+const ICONS={call:'<svg class="nic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h3l2 5-2.5 1.5a11 11 0 0 0 7 7L16 14l5 2v3a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2z"/></svg>'};
+const navA=([h,t,p,ic])=>`<a class="nb${ic?" nb-ic":""}${p===PAGE?" active":""}" href="${h}"${p===PAGE?' aria-current="page"':""}>${ic?ICONS[ic]:""}<span>${t}</span></a>`;
 const svcActive=NAV.services.some(x=>x[2]===PAGE);
 document.getElementById("site-header").outerHTML=`<header>
 <div class="wrap bar">
@@ -94,7 +95,9 @@ if(stage&&VLIST.length){
   stage.classList.remove("ready","tall");v.src=x.src;bg.src=x.src;v.muted=muted;
   if(!paused){v.play().catch(()=>{});}
  }
- v.addEventListener("loadedmetadata",()=>{stage.classList.add("ready");stage.classList.toggle("tall",v.videoHeight>v.videoWidth);if(stage.classList.contains("tall")&&!paused)bg.play().catch(()=>{})});
+ const fitMode=()=>{if(!v.videoWidth)return;const va=v.videoWidth/v.videoHeight,sa=stage.clientWidth/stage.clientHeight;stage.classList.toggle("tall",Math.max(va/sa,sa/va)>1.35)};
+ addEventListener("resize",fitMode);
+ v.addEventListener("loadedmetadata",()=>{stage.classList.add("ready");fitMode();if(stage.classList.contains("tall")&&!paused)bg.play().catch(()=>{})});
  v.addEventListener("error",soon);
  v.addEventListener("timeupdate",()=>{if(v.duration)bar(v.currentTime/v.duration)});
  v.addEventListener("ended",next);
