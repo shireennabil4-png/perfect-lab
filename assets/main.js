@@ -64,16 +64,52 @@ document.querySelectorAll("[data-wa]").forEach(a=>{if(C.whatsapp){a.href="https:
 $("#yr").textContent=new Date().getFullYear();
 
 // ===== Videos: show "coming soon" until the file is uploaded =====
+const VLIST=typeof VIDEOS!=="undefined"?VIDEOS:[];
 document.querySelectorAll("video[data-vid]").forEach(v=>{
- const box=v.closest(".vbox"),src=(typeof VIDEOS!=="undefined"&&VIDEOS[v.dataset.vid])||"";
+ const box=v.closest(".vbox"),src=(VLIST.find(x=>x.key===v.dataset.vid)||{}).src||"";
  if(!src)return;
  v.addEventListener("loadedmetadata",()=>box.classList.add("ready"));
  v.addEventListener("error",()=>box.classList.remove("ready"));
  v.src=src;
 });
 
-// ===== Branches map (Leaflet + OpenStreetMap) =====
 const onLang=[];
+// ===== Home: full-width videos that play one after another =====
+const stage=$(".stage");
+if(stage&&VLIST.length){
+ const v=stage.querySelector(".st-v"),bg=stage.querySelector(".st-bg"),tabs=$("#st-tabs"),ICON={lab:"🔬",tests:"🧪",branches:"📍"};
+ const SOON=6000;let i=0,timer=null,paused=false,muted=true,t0=0;
+ // stage height = visible screen under the header
+ const fitH=()=>document.documentElement.style.setProperty("--hh",document.querySelector("header").offsetHeight+"px");
+ fitH();addEventListener("resize",fitH);
+ const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;if(reduce)paused=true;
+ const cap=()=>{const x=VLIST[i];$("#st-title").textContent=T(x.title);$("#st-text").textContent=T(x.text);
+  tabs.innerHTML=VLIST.map((y,k)=>`<button type="button" role="tab" aria-selected="${k===i}" class="st-tab${k===i?" on":""}" data-k="${k}"><span class="sbar"><i></i></span>${esc(T(y.title))}</button>`).join("")};
+ const bar=p=>{const el=tabs.querySelector(".st-tab.on i");if(el)el.style.width=Math.min(100,p*100)+"%"};
+ const next=()=>go((i+1)%VLIST.length);
+ function soon(){stage.classList.remove("ready");$("#st-icon").textContent=ICON[VLIST[i].key]||"🎬";clearInterval(timer);t0=Date.now();
+  timer=setInterval(()=>{if(paused){t0+=250;return}const p=(Date.now()-t0)/SOON;bar(p);if(p>=1)next()},250)}
+ function go(k){
+  i=k;clearInterval(timer);cap();const x=VLIST[i];
+  stage.classList.remove("ready","tall");v.src=x.src;bg.src=x.src;v.muted=muted;
+  if(!paused){v.play().catch(()=>{});}
+ }
+ v.addEventListener("loadedmetadata",()=>{stage.classList.add("ready");stage.classList.toggle("tall",v.videoHeight>v.videoWidth);if(stage.classList.contains("tall")&&!paused)bg.play().catch(()=>{})});
+ v.addEventListener("error",soon);
+ v.addEventListener("timeupdate",()=>{if(v.duration)bar(v.currentTime/v.duration)});
+ v.addEventListener("ended",next);
+ tabs.addEventListener("click",e=>{const b=e.target.closest(".st-tab");if(b)go(+b.dataset.k)});
+ const pb=$("#st-play"),sb=$("#st-sound");
+ const ui=()=>{pb.textContent=paused?"▶":"❚❚";pb.setAttribute("aria-label",T(paused?"تشغيل":"إيقاف مؤقت"));sb.textContent=muted?"🔇":"🔊";sb.setAttribute("aria-label",T(muted?"تشغيل الصوت":"كتم الصوت"))};
+ pb.onclick=()=>{paused=!paused;if(stage.classList.contains("ready")){if(paused){v.pause();bg.pause()}else{v.play().catch(()=>{});if(stage.classList.contains("tall"))bg.play().catch(()=>{})}}ui()};
+ sb.onclick=()=>{muted=!muted;v.muted=muted;if(!muted&&paused){paused=false;v.play().catch(()=>{})}ui()};
+ // pause when the stage is scrolled out of view (saves data/battery)
+ if("IntersectionObserver"in window)new IntersectionObserver(([e])=>{if(!stage.classList.contains("ready")||paused)return;e.isIntersecting?v.play().catch(()=>{}):v.pause()}).observe(stage);
+ onLang.push(()=>{cap();ui()});
+ setTimeout(()=>go(0)); // after translations are ready
+}
+
+// ===== Branches map (Leaflet + OpenStreetMap) =====
 const mapEl=$("#br-map"),listEl=$("#br-list");
 if(mapEl&&listEl){
  const BR=C.branches.filter(b=>b.lat&&b.lng);let map=null,marks=[];
@@ -126,7 +162,9 @@ if(form)form.addEventListener("submit",e=>{
  const m=$("#msg");m.style.display="block";
  if(C.whatsapp){
   const t=`طلب جديد\nالاسم: ${d.name}\nالهاتف: ${d.phone}\nالخدمة: ${d.test}\nالفرع: ${d.branch}\nالتاريخ: ${d.date||"-"}\nملاحظات: ${d.notes||"-"}`;
-  window.open("https://wa.me/"+C.whatsapp+"?text="+encodeURIComponent(t),"_blank");
+  const url="https://wa.me/"+C.whatsapp+"?text="+encodeURIComponent(t);
+  if(!window.open(url,"_blank"))location.href=url;
+  f.reset();
   m.textContent=T("تم تجهيز طلبك في واتساب؛ أرسل الرسالة لإتمام الطلب. سيؤكد المعمل الموعد معك.");
  }else m.textContent=T("هذا نموذج تجريبي: لم يتم إرسال أي بيانات ولا يوجد حجز. أضف رقم واتساب في CONFIG أو اربط خدمة استقبال فعلية.");
 });
@@ -210,7 +248,7 @@ Object.assign(EN,{
 "احجز أو استفسر عن تحليل.":"Book or ask about a test.","تعرف على المعمل ورسالته.":"Learn about the lab and its mission.",
 "عرض التفاصيل":"View details","احجز الآن":"Book now","هل لديك سؤال آخر؟":"Have another question?","تواصل معنا وسيرد عليك فريقنا في أقرب وقت.":"Contact us and our team will get back to you soon.",
 "جاهز تحجز تحليلك؟":"Ready to book your test?","احجز من الفرع أو اطلب سحب العينة من المنزل.":"Book at a branch or request home sample collection.",
-"في ملف":"in the file","الصفحة غير موجودة":"Page not found","الرابط الذي فتحته غير متاح. ارجع للصفحة الرئيسية.":"The link you opened is not available. Go back to the home page.","العودة للرئيسية":"Back to home","الزيارة المنزلية":"Home Visit","شاهد معامل برفكت لاب":"Take a look inside Perfect Lab","الفيديو سيُضاف قريبًا":"Video coming soon",
+"في ملف":"in the file","الصفحة غير موجودة":"Page not found","الرابط الذي فتحته غير متاح. ارجع للصفحة الرئيسية.":"The link you opened is not available. Go back to the home page.","العودة للرئيسية":"Back to home","الزيارة المنزلية":"Home Visit","فيديوهات معامل برفكت لاب":"Perfect Lab videos","إيقاف مؤقت":"Pause","تشغيل":"Play","تشغيل الصوت":"Turn sound on","كتم الصوت":"Mute","شاهد معامل برفكت لاب":"Take a look inside Perfect Lab","الفيديو سيُضاف قريبًا":"Video coming soon",
 "المعمل والأجهزة":"The lab and equipment","جولة داخل معمل برفكت لاب والأجهزة المستخدمة في التحاليل.":"A tour inside Perfect Lab and the equipment used for testing.",
 "التحاليل والزيارات المنزلية":"Tests and home visits","تعرف على التحاليل المتاحة وطريقة طلب سحب العينة من المنزل.":"Learn about the available tests and how to request home sample collection.",
 "فروعنا":"Our branches","تعرف على فروع برفكت لاب وأماكنها.":"Get to know Perfect Lab branches and where they are.",
