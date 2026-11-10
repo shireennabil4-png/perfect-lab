@@ -64,22 +64,22 @@ fill("#c-soc",Object.keys(C.social).length?Object.entries(C.social).map(([k,v])=
 document.querySelectorAll("[data-wa]").forEach(a=>{if(C.whatsapp){a.href="https://wa.me/"+C.whatsapp;a.target="_blank";a.rel="noopener"}});
 $("#yr").textContent=new Date().getFullYear();
 
-// ===== Videos: show "coming soon" until the file is uploaded =====
+// ===== Branches page video (shown once loaded) =====
 const VLIST=typeof VIDEOS!=="undefined"?VIDEOS:[];
 document.querySelectorAll("video[data-vid]").forEach(v=>{
  const box=v.closest(".vbox"),src=(VLIST.find(x=>x.key===v.dataset.vid)||{}).src||"";
  if(!src)return;
  v.addEventListener("loadedmetadata",()=>box.classList.add("ready"));
  v.addEventListener("error",()=>box.classList.remove("ready"));
- v.src=src;
+ v.src=src+"?v="+(document.querySelector('script[src*="main.js"]').src.split("v=")[1]||"1");
 });
 
 const onLang=[];
 // ===== Home: full-width videos that play one after another =====
 const stage=$(".stage");
 if(stage&&VLIST.length){
- const v=stage.querySelector(".st-v"),tabs=$("#st-tabs"),ICON={lab:"🔬",tests:"🧪",home:"🏠",branches:"📍"};
- const SOON=6000;let i=0,timer=null,paused=false,muted=true,t0=0;
+ const v=stage.querySelector(".st-v"),tabs=$("#st-tabs");
+ const VQ="?v="+(document.querySelector('script[src*="main.js"]').src.split("v=")[1]||"1");let i=0,paused=false,muted=true,fails=0,retried=false;
  // stage height = visible screen under the header
  const fitH=()=>document.documentElement.style.setProperty("--hh",document.querySelector("header").offsetHeight+"px");
  fitH();addEventListener("resize",fitH);
@@ -88,15 +88,16 @@ if(stage&&VLIST.length){
   tabs.innerHTML=VLIST.map((y,k)=>`<button type="button" role="tab" aria-selected="${k===i}" class="st-tab${k===i?" on":""}" data-k="${k}"><span class="sbar"><i></i></span>${esc(T(y.title))}</button>`).join("")};
  const bar=p=>{const el=tabs.querySelector(".st-tab.on i");if(el)el.style.width=Math.min(100,p*100)+"%"};
  const next=()=>go((i+1)%VLIST.length);
- function soon(){stage.classList.add("soon");$("#st-icon").textContent=ICON[VLIST[i].key]||"🎬";clearInterval(timer);t0=Date.now();
-  timer=setInterval(()=>{if(paused){t0+=250;return}const p=(Date.now()-t0)/SOON;bar(p);if(p>=1)next()},250)}
+ function onFail(){ // try once more with a fresh copy, then move on quietly
+  if(!retried){retried=true;v.src=VLIST[i].src+VQ+"r"+Date.now();if(!paused)v.play().catch(()=>{});return}
+  if(++fails>=VLIST.length)return; setTimeout(next,300)}
  function go(k){
-  i=k;clearInterval(timer);cap();const x=VLIST[i];
-  stage.classList.remove("ready","soon");v.src=x.src;v.muted=muted;
+  i=k;retried=false;cap();const x=VLIST[i];
+  stage.classList.remove("ready");v.src=x.src+VQ;v.muted=muted;
   if(!paused){v.play().catch(()=>{});}
  }
- v.addEventListener("loadedmetadata",()=>{stage.classList.add("ready")});
- v.addEventListener("error",soon);
+ v.addEventListener("loadedmetadata",()=>{stage.classList.add("ready");fails=0});
+ v.addEventListener("error",onFail);
  v.addEventListener("timeupdate",()=>{if(v.duration)bar(v.currentTime/v.duration)});
  v.addEventListener("ended",next);
  tabs.addEventListener("click",e=>{const b=e.target.closest(".st-tab");if(b)go(+b.dataset.k)});
