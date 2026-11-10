@@ -7,11 +7,14 @@ const CONFIG={
  branches:[ // أضف: address, phone, hours, map — و lat/lng = مكان الفرع على الخريطة (الحالي تقريبي حسب المنطقة)
   {n:"التبين",en:"El Tebbin",lat:29.7900,lng:31.3000},
   {n:"حلوان",en:"Helwan",lat:29.8500,lng:31.3340},
-  {n:"حدائق حلوان",en:"Hadayek Helwan",lat:29.8720,lng:31.3170},
+  {n:"حدائق حلوان",en:"Hadayek Helwan",lat:29.8697,lng:31.3205,address:"أمام محطة مترو حدائق حلوان",address_en:"In front of Hadayek Helwan metro station"},
+  {n:"الدواجن",en:"El Dawagen",lat:29.8760,lng:31.3000},
+  {n:"المعصرة",en:"El Maasara",lat:29.9060,lng:31.2995},
   {n:"المعادي",en:"Maadi",lat:29.9600,lng:31.2570},
   {n:"زهراء المعادي",en:"Zahraa El Maadi",lat:29.9590,lng:31.3050},
   {n:"مصر الجديدة",en:"Heliopolis",lat:30.0900,lng:31.3250},
   {n:"فيصل",en:"Faisal",lat:30.0000,lng:31.1700},
+  {n:"المهندسين",en:"Mohandessin",lat:30.0561,lng:31.2010},
   {n:"6 أكتوبر",en:"6th of October",lat:29.9380,lng:30.9140}],
  offers:[ // أضف: price, tests, discount, valid
   {n:"باقات الفحص الشامل"},{n:"باقات متابعة السكر"},{n:"باقات الفيتامينات والمعادن"},{n:"باقات الصحة العامة"},{n:"العروض الموسمية"}],
