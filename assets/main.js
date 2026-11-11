@@ -6,6 +6,7 @@ const NAV={
  after:[["branches.html","الفروع","branches"],["home-collection.html","الزيارة المنزلية","home-collection"],["contact.html","اتصل بنا","contact","call"],["about.html","عن برفكت","about"]]
 };
 const PAGE=document.body.dataset.page||"";
+const onLangLate=[];
 // Old one-page links (index.html#faq) go to the new page
 const OLD={"#about":"about.html","#services":"services.html","#home-collection":"home-collection.html","#offers":"offers.html","#branches":"branches.html","#prepare":"prepare.html","#faq":"faq.html","#contact":"contact.html"};
 if(PAGE==="home"&&OLD[location.hash])location.replace(OLD[location.hash]);
@@ -18,6 +19,7 @@ document.getElementById("site-header").outerHTML=`<header>
 <span class="bname"><span class="bar-ar" lang="ar">معامل برفكت لاب</span><span class="bar-en" lang="en">PERFECT LAB</span></span></a>
 <div class="tools">
 <a class="nb login" href="login.html">تسجيل الدخول</a>
+<button class="ib" id="search" type="button" aria-label="بحث" title="بحث" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
 <button class="ib" id="cart" type="button" aria-label="السلة" title="السلة"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3.5h2.8l2.4 11.2a1 1 0 0 0 1 .8h9.1a1 1 0 0 0 1-.8l1.5-7.4H6.2"/></svg></button>
 <button class="ib" id="bell" type="button" aria-label="الإشعارات" title="الإشعارات"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5.5 2 6.8 2 6.8H4S6 14.5 6 9z"/><path d="M10 19.5a2.2 2.2 0 0 0 4 0"/></svg></button>
 <button class="lang" id="lang" type="button" aria-label="Change language / تغيير اللغة">عربي</button>
@@ -35,6 +37,11 @@ ${NAV.after.map(navA).join("")}
 </nav>
 </div></div>
 </header>`;
+document.body.insertAdjacentHTML("beforeend",`<div class="srch" id="srch" role="dialog" aria-modal="true" aria-label="بحث" hidden>
+<div class="srch-box"><div class="srch-row"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+<input id="srch-q" type="text" autocomplete="off" placeholder="ابحث عن تحليل أو عرض أو فرع…" aria-label="ابحث في الموقع">
+<button type="button" class="srch-x" id="srch-x" aria-label="إغلاق">✕</button></div>
+<ul class="srch-res" id="srch-res"></ul><p class="srch-empty" id="srch-empty" hidden>مفيش نتايج. جرّب كلمة تانية أو كلّمنا على واتساب.</p></div></div>`);
 document.getElementById("site-footer").outerHTML=`<footer><div class="wrap">
 <div class="fg">
 <div><h3>🔬 برفكت لاب</h3><p>مختبر تحاليل طبية تحت إدارة د. أحمد فكري.</p></div>
@@ -155,6 +162,30 @@ ddb.onclick=e=>{e.stopPropagation();ddSet(!dd.classList.contains("open"))};
 document.addEventListener("click",e=>{if(!dd.contains(e.target))ddSet(false)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")ddSet(false)});
 
+// ===== Site search (tests, offers, branches, FAQ, pages) =====
+{
+ const box=$("#srch"),q=$("#srch-q"),res=$("#srch-res"),empty=$("#srch-empty"),opener=$("#search");
+ const norm=x=>String(x).toLowerCase().replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/[ً-ْ]/g,"");
+ const idx=()=>{const en=document.documentElement.lang==="en",L=x=>en&&EN[x]?EN[x]:x,out=[];
+  const strip=x=>String(x).replace(/<[^>]+>/g,"").trim();
+  SV.forEach(x=>{const d=strip(x[2]);out.push({t:L(x[1]),d:L(d)===d?L(x[2]):L(d),a:x[1]+" "+d,h:"services.html",ic:x[0]})});
+  C.offers.forEach(o=>out.push({t:L(o.n),d:(o.price?o.price+" "+L("جنيه"):(o.discount?L(o.discount):""))+(o.tests?" · "+o.tests.map(L).join(en?", ":"، "):""),a:o.n+" "+(o.tests||[]).join(" "),h:"offers.html",ic:"🎁"}));
+  C.branches.forEach(b=>out.push({t:en?(b.en||b.n)+" Branch":"فرع "+b.n,d:(en&&b.address_en)?b.address_en:(b.address||""),a:"فرع "+b.n+" "+(b.en||"")+" "+(b.address||"")+" "+(b.address_en||""),h:"branches.html",ic:"📍"}));
+  C.faq.forEach(f=>out.push({t:L(f[0]),d:L(f[1]),a:f[0]+" "+f[1],h:"faq.html",ic:"❓"}));
+  [["home-collection.html","الزيارة المنزلية","🏠"],["prepare.html","التحضير للتحليل","📝"],["contact.html","اتصل بنا","📞"],["about.html","عن برفكت","🔬"]].forEach(([h,t,ic])=>out.push({t:L(t),d:"",a:t,h,ic}));
+  return out};
+ const draw=()=>{const v=norm(q.value.trim());if(!v){res.innerHTML="";empty.hidden=true;return}
+  const words=v.split(/\s+/);const hits=idx().filter(x=>{const hay=norm(x.t+" "+x.d+" "+(x.a||""));return words.every(w=>hay.includes(w))}).slice(0,12);
+  res.innerHTML=hits.map(x=>`<li><a href="${x.h}"><span aria-hidden="true">${x.ic}</span><span><b>${esc(x.t)}</b>${x.d?`<small>${esc(x.d)}</small>`:""}</span></a></li>`).join("");
+  empty.hidden=hits.length>0};
+ const open=()=>{box.hidden=false;document.body.style.overflow="hidden";q.value="";draw();setTimeout(()=>q.focus(),30)};
+ const close=()=>{box.hidden=true;document.body.style.overflow="";opener.focus()};
+ opener.onclick=open;$("#srch-x").onclick=close;q.addEventListener("input",draw);
+ box.addEventListener("click",e=>{if(e.target===box)close()});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!box.hidden)close();if(e.key==="/"&&box.hidden&&!/input|textarea|select/i.test(document.activeElement.tagName)){e.preventDefault();open()}});
+ onLangLate.push(()=>{q.placeholder=T("ابحث عن تحليل أو عرض أو فرع…");q.setAttribute("aria-label",T("ابحث في الموقع"));opener.setAttribute("aria-label",T("بحث"));opener.title=T("بحث");$("#srch-x").setAttribute("aria-label",T("إغلاق"));draw()});
+}
+
 // ===== Booking form (Contact page) =====
 const form=$("#f");
 if(form)form.addEventListener("submit",e=>{
@@ -163,11 +194,12 @@ if(form)form.addEventListener("submit",e=>{
  set("name",d.name.trim().length<3?T("يرجى إدخال الاسم."):"");
  set("phone",/^[+\d\s-]{8,16}$/.test(d.phone.trim())?"":T("يرجى إدخال رقم هاتف صحيح."));
  set("test",d.test.trim()?"":T("يرجى تحديد التحليل أو الخدمة."));
+ $("#e-gender").textContent=d.gender?"":T("يرجى اختيار الجنس.");if(!d.gender)ok=false;
  $("#e-ok").textContent=f.ok.checked?"":T("الموافقة مطلوبة للمتابعة.");if(!f.ok.checked)ok=false;
  if(!ok)return;
  const m=$("#msg");m.style.display="block";
  if(C.whatsapp){
-  const t=`طلب جديد\nالاسم: ${d.name}\nالهاتف: ${d.phone}\nالخدمة: ${d.test}\nالفرع: ${d.branch}\nالتاريخ: ${d.date||"-"}\nملاحظات: ${d.notes||"-"}`;
+  const t=`طلب جديد\nالاسم: ${d.name}\nالجنس: ${d.gender}\nالهاتف: ${d.phone}\nالخدمة: ${d.test}\nالفرع: ${d.branch}\nالتاريخ: ${d.date||"-"}\nملاحظات: ${d.notes||"-"}`;
   const url="https://wa.me/"+C.whatsapp+"?text="+encodeURIComponent(t);
   if(!window.open(url,"_blank"))location.href=url;
   f.reset();
@@ -254,7 +286,7 @@ Object.assign(EN,{
 "احجز أو استفسر عن تحليل.":"Book or ask about a test.","تعرف على المعمل ورسالته.":"Learn about the lab and its mission.",
 "عرض التفاصيل":"View details","احجز الآن":"Book now","هل لديك سؤال آخر؟":"Have another question?","تواصل معنا وسيرد عليك فريقنا في أقرب وقت.":"Contact us and our team will get back to you soon.",
 "جاهز تحجز تحليلك؟":"Ready to book your test?","احجز من الفرع أو اطلب سحب العينة من المنزل.":"Book at a branch or request home sample collection.",
-"في ملف":"in the file","الصفحة غير موجودة":"Page not found","الرابط الذي فتحته غير متاح. ارجع للصفحة الرئيسية.":"The link you opened is not available. Go back to the home page.","العودة للرئيسية":"Back to home","الزيارة المنزلية":"Home Visit","اضغط على صورة أي عرض لعرضها بالحجم الكامل، أو احجز مباشرة على واتساب. العروض متاحة في كل فروعنا مع خدمة السحب المنزلي.": "Tap any offer image to see it full size, or book directly on WhatsApp. Offers are available at all our branches, with home sample collection.", "جنيه": "EGP", "التحاليل المتضمنة": "Included tests", "احجز على واتساب": "Book on WhatsApp", "الباقة الشاملة": "Comprehensive package", "باقة تورم القدمين": "Swollen feet package", "باقة صحة القلب": "Heart health package", "تحليل جرثومة المعدة بالنفس (Urea Breath Test)": "H. pylori breath test (Urea Breath Test)", "باقة الفيتامينات والعناصر": "Vitamins & minerals package", "باقة صحة الكلى": "Kidney health package", "باقة تحاليل السكر": "Diabetes tests package", "عرض فيتامين د": "Vitamin D offer", "تحليل السكر التراكمي (HbA1c)": "HbA1c test", "عرض هشاشة العظام": "Osteoporosis offer", "خصم 50%": "50% off", "صورة دم كاملة (CBC)": "Complete blood count (CBC)", "مخزون الحديد (Ferritin)": "Iron stores (Ferritin)", "سكر صائم (FBS)": "Fasting blood sugar (FBS)", "سكر تراكمي (HbA1c)": "HbA1c", "الكوليسترول الكلي": "Total cholesterol", "الكوليسترول عالي الكثافة (HDL)": "HDL cholesterol", "الكوليسترول منخفض الكثافة (LDL)": "LDL cholesterol", "الدهون الثلاثية (TG)": "Triglycerides (TG)", "اليوريا (Urea)": "Urea", "الكرياتينين (Creatinine)": "Creatinine", "حمض اليوريك": "Uric acid", "وظائف الكبد (GPT – GOT)": "Liver function (GPT – GOT)", "وظائف الغدة (TSH)": "Thyroid (TSH)", "وظائف الكلى (كرياتينين + يوريا)": "Kidney function (creatinine + urea)", "الأملاح (صوديوم + بوتاسيوم)": "Electrolytes (sodium + potassium)", "وظائف الكبد (LFT)": "Liver function (LFT)", "الألبومين": "Albumin", "تحليل البول": "Urine analysis", "سكر صائم + تراكمي (HbA1c)": "Fasting sugar + HbA1c", "الكوليسترول (Cholesterol)": "Cholesterol", "الدهون الثلاثية (Triglycerides)": "Triglycerides", "وظائف الكلى (Creatinine)": "Kidney function (Creatinine)", "وظائف الكبد (GPT)": "Liver function (GPT)", "بدون منظار": "No endoscopy", "آمن وغير مؤلم": "Safe and painless", "سريع في الأداء": "Quick to perform", "فيتامين D": "Vitamin D", "فيتامين B12": "Vitamin B12", "مخزون الحديد": "Iron stores", "صورة الدم الكاملة": "Complete blood count", "كرياتينين (Creatinine)": "Creatinine", "يوريا (Urea)": "Urea", "حمض اليوريك (Uric Acid)": "Uric acid", "تحليل بول كامل": "Complete urine analysis", "سكر فاطر (PPS)": "Post-meal sugar (PPS)", "فيتامين D3": "Vitamin D3", "الكالسيوم (Calcium)": "Calcium", "الفوسفور (Phosphorus)": "Phosphorus","جولة في معامل برفكت لاب":"A tour of Perfect Lab","فيديو من داخل معامل برفكت لاب: المعمل والأجهزة والزيارات المنزلية.":"Real footage from inside Perfect Lab: the lab, equipment and home visits.","فرع حلوان 1":"Helwan 1 Branch","فرع حلوان 2":"Helwan 2 Branch","فرع الدواجن":"El Dawagen Branch","فرع المعصرة":"El Maasara Branch","فرع المهندسين":"Mohandessin Branch","التحاليل المتوفرة":"Available tests","كل التحاليل المتوفرة عندنا مصنفة حسب النوع.":"All the tests we offer, grouped by type.","أخصائي من برفكت لاب بييجي لحد بيتك يسحب العينة.":"A Perfect Lab specialist comes to your home to collect the sample.","الفيديو السابق":"Previous video","الفيديو التالي":"Next video","من 9 صباحًا إلى 11 مساءً":"9:00 AM to 11:00 PM","فيسبوك":"Facebook","فيديوهات معامل برفكت لاب":"Perfect Lab videos","إيقاف مؤقت":"Pause","تشغيل":"Play","تشغيل الصوت":"Turn sound on","كتم الصوت":"Mute","شاهد معامل برفكت لاب":"Take a look inside Perfect Lab","الفيديو سيُضاف قريبًا":"Video coming soon",
+"في ملف":"in the file","الصفحة غير موجودة":"Page not found","الرابط الذي فتحته غير متاح. ارجع للصفحة الرئيسية.":"The link you opened is not available. Go back to the home page.","العودة للرئيسية":"Back to home","الزيارة المنزلية":"Home Visit","بحث": "Search", "ابحث عن تحليل أو عرض أو فرع…": "Search for a test, offer or branch…", "ابحث في الموقع": "Search the site", "إغلاق": "Close", "مفيش نتايج. جرّب كلمة تانية أو كلّمنا على واتساب.": "No results. Try another word or message us on WhatsApp.", "الجنس": "Gender", "ذكر": "Male", "أنثى": "Female", "يرجى اختيار الجنس.": "Please choose a gender.","اضغط على صورة أي عرض لعرضها بالحجم الكامل، أو احجز مباشرة على واتساب. العروض متاحة في كل فروعنا مع خدمة السحب المنزلي.": "Tap any offer image to see it full size, or book directly on WhatsApp. Offers are available at all our branches, with home sample collection.", "جنيه": "EGP", "التحاليل المتضمنة": "Included tests", "احجز على واتساب": "Book on WhatsApp", "الباقة الشاملة": "Comprehensive package", "باقة تورم القدمين": "Swollen feet package", "باقة صحة القلب": "Heart health package", "تحليل جرثومة المعدة بالنفس (Urea Breath Test)": "H. pylori breath test (Urea Breath Test)", "باقة الفيتامينات والعناصر": "Vitamins & minerals package", "باقة صحة الكلى": "Kidney health package", "باقة تحاليل السكر": "Diabetes tests package", "عرض فيتامين د": "Vitamin D offer", "تحليل السكر التراكمي (HbA1c)": "HbA1c test", "عرض هشاشة العظام": "Osteoporosis offer", "خصم 50%": "50% off", "صورة دم كاملة (CBC)": "Complete blood count (CBC)", "مخزون الحديد (Ferritin)": "Iron stores (Ferritin)", "سكر صائم (FBS)": "Fasting blood sugar (FBS)", "سكر تراكمي (HbA1c)": "HbA1c", "الكوليسترول الكلي": "Total cholesterol", "الكوليسترول عالي الكثافة (HDL)": "HDL cholesterol", "الكوليسترول منخفض الكثافة (LDL)": "LDL cholesterol", "الدهون الثلاثية (TG)": "Triglycerides (TG)", "اليوريا (Urea)": "Urea", "الكرياتينين (Creatinine)": "Creatinine", "حمض اليوريك": "Uric acid", "وظائف الكبد (GPT – GOT)": "Liver function (GPT – GOT)", "وظائف الغدة (TSH)": "Thyroid (TSH)", "وظائف الكلى (كرياتينين + يوريا)": "Kidney function (creatinine + urea)", "الأملاح (صوديوم + بوتاسيوم)": "Electrolytes (sodium + potassium)", "وظائف الكبد (LFT)": "Liver function (LFT)", "الألبومين": "Albumin", "تحليل البول": "Urine analysis", "سكر صائم + تراكمي (HbA1c)": "Fasting sugar + HbA1c", "الكوليسترول (Cholesterol)": "Cholesterol", "الدهون الثلاثية (Triglycerides)": "Triglycerides", "وظائف الكلى (Creatinine)": "Kidney function (Creatinine)", "وظائف الكبد (GPT)": "Liver function (GPT)", "بدون منظار": "No endoscopy", "آمن وغير مؤلم": "Safe and painless", "سريع في الأداء": "Quick to perform", "فيتامين D": "Vitamin D", "فيتامين B12": "Vitamin B12", "مخزون الحديد": "Iron stores", "صورة الدم الكاملة": "Complete blood count", "كرياتينين (Creatinine)": "Creatinine", "يوريا (Urea)": "Urea", "حمض اليوريك (Uric Acid)": "Uric acid", "تحليل بول كامل": "Complete urine analysis", "سكر فاطر (PPS)": "Post-meal sugar (PPS)", "فيتامين D3": "Vitamin D3", "الكالسيوم (Calcium)": "Calcium", "الفوسفور (Phosphorus)": "Phosphorus","جولة في معامل برفكت لاب":"A tour of Perfect Lab","فيديو من داخل معامل برفكت لاب: المعمل والأجهزة والزيارات المنزلية.":"Real footage from inside Perfect Lab: the lab, equipment and home visits.","فرع حلوان 1":"Helwan 1 Branch","فرع حلوان 2":"Helwan 2 Branch","فرع الدواجن":"El Dawagen Branch","فرع المعصرة":"El Maasara Branch","فرع المهندسين":"Mohandessin Branch","التحاليل المتوفرة":"Available tests","كل التحاليل المتوفرة عندنا مصنفة حسب النوع.":"All the tests we offer, grouped by type.","أخصائي من برفكت لاب بييجي لحد بيتك يسحب العينة.":"A Perfect Lab specialist comes to your home to collect the sample.","الفيديو السابق":"Previous video","الفيديو التالي":"Next video","من 9 صباحًا إلى 11 مساءً":"9:00 AM to 11:00 PM","فيسبوك":"Facebook","فيديوهات معامل برفكت لاب":"Perfect Lab videos","إيقاف مؤقت":"Pause","تشغيل":"Play","تشغيل الصوت":"Turn sound on","كتم الصوت":"Mute","شاهد معامل برفكت لاب":"Take a look inside Perfect Lab","الفيديو سيُضاف قريبًا":"Video coming soon",
 "المعمل والأجهزة":"The lab and equipment","جولة داخل معمل برفكت لاب والأجهزة المستخدمة في التحاليل.":"A tour inside Perfect Lab and the equipment used for testing.",
 "التحاليل والزيارات المنزلية":"Tests and home visits","تعرف على التحاليل المتاحة وطريقة طلب سحب العينة من المنزل.":"Learn about the available tests and how to request home sample collection.",
 "فروعنا":"Our branches","تعرف على فروع برفكت لاب وأماكنها.":"Get to know Perfect Lab branches and where they are.",
@@ -278,7 +310,7 @@ function setLang(l){
  lb.textContent=en?"عربي":"English";
  [["#cart","Cart","السلة"],["#ddbtn","Show services menu","عرض قائمة الخدمات"],["#bell","Notifications","الإشعارات"]].forEach(([q,e,a])=>{const b=$(q),t=en?e:a;b.setAttribute("aria-label",t);b.title=t});
  try{localStorage.setItem("lang",l)}catch(e){}
- onLang.forEach(f=>f());
+ onLang.forEach(f=>f());onLangLate.forEach(f=>f());
 }
 lb.onclick=()=>setLang(document.documentElement.lang==="ar"?"en":"ar");
 let saved=null;try{saved=localStorage.getItem("lang")}catch(e){}
