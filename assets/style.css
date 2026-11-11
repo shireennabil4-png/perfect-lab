@@ -168,8 +168,8 @@ footer{border-top:5px solid var(--red)}
 /* Full-width video stage: white, nothing over the video */
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .stage{position:relative;width:100%;background:#fff;padding:0;border-bottom:1px solid var(--line)}
-.st-area{position:relative;width:100%;aspect-ratio:16/9;background:#fff;overflow:hidden}
-.st-v{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff}
+.st-area{position:relative;width:100%;height:min(56.25vw,calc(100vh - var(--hh,150px)));height:min(56.25vw,calc(100svh - var(--hh,150px)));background:#fff;overflow:hidden}
+.st-v{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%;background:#fff}
 .st-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:56px;height:56px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:var(--blue);cursor:pointer;display:grid;place-items:center;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .st-prev{inset-inline-start:18px}.st-next{inset-inline-end:18px}
 .st-v{cursor:pointer}
