@@ -78,44 +78,28 @@ const onLang=[];
 // ===== Home: full-width videos that play one after another =====
 const stage=$(".stage");
 if(stage&&VLIST.length){
- const v=stage.querySelector(".st-v"),tabs=$("#st-tabs");
- const VQ="?v="+(document.querySelector('script[src*="main.js"]').src.split("v=")[1]||"1");let i=0,paused=false,muted=true,fails=0,retried=false;
- // stage height = visible screen under the header
+ const v=stage.querySelector(".st-v");
+ const VQ="?v="+(document.querySelector('script[src*="main.js"]').src.split("v=")[1]||"1");
+ let i=0,fails=0,retried=false;
  const fitH=()=>document.documentElement.style.setProperty("--hh",document.querySelector("header").offsetHeight+"px");
  fitH();addEventListener("resize",fitH);
- const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;if(reduce)paused=true;
- const cap=()=>{const x=VLIST[i];$("#st-title").textContent=T(x.title);$("#st-text").textContent=T(x.text);
-  tabs.innerHTML=VLIST.map((y,k)=>`<button type="button" role="tab" aria-selected="${k===i}" class="st-tab${k===i?" on":""}" data-k="${k}"><span class="sbar"><i></i></span>${esc(T(y.title))}</button>`).join("")};
- const bar=p=>{const el=tabs.querySelector(".st-tab.on i");if(el)el.style.width=Math.min(100,p*100)+"%"};
- const next=()=>go((i+1)%VLIST.length);
- function onFail(){ // try once more with a fresh copy, then move on quietly
-  if(!retried){retried=true;v.src=VLIST[i].src+VQ+"r"+Date.now();if(!paused)v.play().catch(()=>{});return}
-  if(++fails>=VLIST.length)return; setTimeout(next,300)}
- function go(k){
-  i=k;retried=false;cap();const x=VLIST[i];
-  stage.classList.remove("ready");v.src=x.src+VQ;v.muted=muted;
-  if(!paused){v.play().catch(()=>{});}
- }
- v.addEventListener("loadedmetadata",()=>{stage.classList.add("ready");fails=0});
- v.addEventListener("error",onFail);
- v.addEventListener("timeupdate",()=>{if(v.duration)bar(v.currentTime/v.duration)});
+ const go=k=>{i=k;retried=false;v.src=VLIST[i].src+VQ;v.play().catch(()=>{})};
+ const next=()=>go((i+1)%VLIST.length),prev=()=>go((i-1+VLIST.length)%VLIST.length);
+ v.addEventListener("loadedmetadata",()=>{fails=0});
  v.addEventListener("ended",next);
- tabs.addEventListener("click",e=>{const b=e.target.closest(".st-tab");if(b)go(+b.dataset.k)});
- const prev=()=>go((i-1+VLIST.length)%VLIST.length);
+ v.addEventListener("error",()=>{ // retry once with a fresh copy, then move on quietly
+  if(!retried){retried=true;v.src=VLIST[i].src+VQ+"r"+Date.now();v.play().catch(()=>{});return}
+  if(++fails<VLIST.length)setTimeout(next,300)});
+ // tap the video to turn sound on/off
+ v.addEventListener("click",()=>{v.muted=!v.muted;if(v.paused)v.play().catch(()=>{})});
  $("#st-prev").onclick=prev;$("#st-next").onclick=next;
+ const lbl=()=>{$("#st-prev").setAttribute("aria-label",T("الفيديو السابق"));$("#st-next").setAttribute("aria-label",T("الفيديو التالي"))};
+ onLang.push(lbl);
  stage.tabIndex=-1;stage.addEventListener("keydown",e=>{const rtl=document.dir==="rtl";if(e.key==="ArrowRight")(rtl?prev:next)();if(e.key==="ArrowLeft")(rtl?next:prev)()});
- // swipe on phones
  let sx=null;stage.addEventListener("touchstart",e=>{sx=e.touches[0].clientX},{passive:true});
  stage.addEventListener("touchend",e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(dx)<50)return;const rtl=document.dir==="rtl";(dx<0)!==rtl?next():prev()},{passive:true});
- const pb=$("#st-play"),sb=$("#st-sound");
- const arrowsUi=()=>{$("#st-prev").setAttribute("aria-label",T("الفيديو السابق"));$("#st-next").setAttribute("aria-label",T("الفيديو التالي"))};
- const ui=()=>{arrowsUi();pb.textContent=paused?"▶":"❚❚";pb.setAttribute("aria-label",T(paused?"تشغيل":"إيقاف مؤقت"));sb.textContent=muted?"🔇":"🔊";sb.setAttribute("aria-label",T(muted?"تشغيل الصوت":"كتم الصوت"))};
- pb.onclick=()=>{paused=!paused;if(paused)v.pause();else v.play().catch(()=>{});ui()};
- sb.onclick=()=>{muted=!muted;v.muted=muted;if(!muted&&paused){paused=false;v.play().catch(()=>{})}ui()};
- // pause when the stage is scrolled out of view (saves data/battery)
- if("IntersectionObserver"in window)new IntersectionObserver(([e])=>{if(!stage.classList.contains("ready")||paused)return;e.isIntersecting?v.play().catch(()=>{}):v.pause()}).observe(stage);
- onLang.push(()=>{cap();ui()});
- setTimeout(()=>go(0)); // after translations are ready
+ if("IntersectionObserver"in window)new IntersectionObserver(([e])=>{e.isIntersecting?v.play().catch(()=>{}):v.pause()}).observe(stage);
+ setTimeout(()=>go(0));
 }
 
 // ===== Branches map (Leaflet + OpenStreetMap) =====
