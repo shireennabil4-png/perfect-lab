@@ -206,6 +206,9 @@ footer{border-top:5px solid var(--red)}
 .vsoon b{font-size:.95rem;background:var(--red);padding:3px 14px;border-radius:99px}
 .vbox.ready .vsoon{display:none}
 .bvbox{max-width:880px;border-radius:20px;overflow:hidden;margin:0 0 28px;box-shadow:var(--shadow)}
+.bvsec{padding:0}
+.bvfull{width:100%;aspect-ratio:16/9;background:#fff}
+.bvfull video{object-fit:cover;background:#fff}
 /* Map */
 .mapgrid{display:grid;grid-template-columns:1.6fr 1fr;gap:20px;align-items:stretch}
 @media(max-width:860px){.mapgrid{grid-template-columns:1fr}}
