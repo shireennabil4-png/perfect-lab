@@ -218,6 +218,20 @@ body[data-page="branches"] .phead p{display:none}
 body[data-page="branches"] .phead h1{margin:0;font-size:clamp(1.4rem,2.8vw,2rem)}
 .map-top{padding-top:0!important}
 .map-top .mapfull{margin-top:0;min-height:340px}
+.ogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px;margin-top:20px}
+.ocard{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--red);border-radius:20px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.oimg{display:block;background:#f3f7fb;aspect-ratio:4/5;overflow:hidden}
+.oimg img{width:100%;height:100%;object-fit:contain;display:block;transition:transform .3s}
+.oimg:hover img,.oimg:focus-visible img{transform:scale(1.03)}
+.obody{padding:16px 18px 18px;display:flex;flex-direction:column;gap:10px;flex:1}
+.obody h3{margin:0;color:var(--primary);font-size:1.1rem;line-height:1.4}
+.oprice{margin:0;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.oprice b{font-size:1.9rem;color:var(--red);line-height:1}.oprice span{font-size:.95rem;color:var(--red);font-weight:700}
+.oprice s{color:var(--muted);font-size:1rem}.oprice s span{color:var(--muted)}.odisc{font-size:1.5rem!important}
+.obody details{border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.obody summary{cursor:pointer;font-weight:700;color:var(--primary)}
+.obody ul{margin:8px 0 2px;padding-inline-start:20px;color:var(--text);line-height:1.8;font-size:.95rem}
+.obtn{margin-top:auto;justify-content:center;text-align:center}
 .brgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;max-height:none;overflow:visible}
 .pinwrap{background:none;border:0}
 .pin{display:block;width:30px;height:30px;border-radius:50% 50% 50% 0;background:var(--red);transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 3px 8px rgba(0,0,0,.35)}
