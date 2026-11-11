@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Join Perfect Lab – Member sign-up</title>
+<meta name="description" content="Join Perfect Lab membership to get offers and reminders on WhatsApp.">
+<link rel="icon" href="assets/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css?v=202611111344">
+</head>
+<body data-page="login" data-title-ar="عضوية برفكت لاب – تسجيل">
+<div id="site-header"></div>
+<main>
+<section class="phead"><div class="wrap">
+<div class="crumb"><a href="index.html">الرئيسية</a> ‹ <span>تسجيل الدخول</span></div>
+<h1>تسجيل الدخول</h1><p>عضوية برفكت لاب</p>
+</div></section>
+<section><div class="wrap regwrap">
+<div class="reginfo">
+<h2>انضم لعضوية برفكت لاب</h2>
+<p class="sub">سجّل بياناتك مرة واحدة، وخلّي فريقنا يتواصل معاك على واتساب بالعروض والتذكيرات ونتايج التحاليل.</p>
+<ul class="perks"><li>عروض وخصومات للأعضاء أول بأول</li><li>تذكير بمواعيد التحاليل الدورية</li><li>حجز أسرع من غير ما تكتب بياناتك كل مرة</li></ul>
+</div>
+<div class="card">
+<form id="reg" novalidate>
+<label>الاسم بالكامل<input name="name" required autocomplete="name"><span class="err" id="r-name"></span></label>
+<label>رقم الواتساب<input name="phone" type="tel" required autocomplete="tel" inputmode="tel" placeholder="01xxxxxxxxx" dir="ltr"><span class="err" id="r-phone"></span></label>
+<fieldset class="gender"><legend>الجنس</legend><div class="gopts"><label class="gopt"><input type="radio" name="gender" value="ذكر" required><span>ذكر</span></label><label class="gopt"><input type="radio" name="gender" value="أنثى"><span>أنثى</span></label></div><span class="err" id="r-gender"></span></fieldset>
+<div class="two">
+<label>تاريخ الميلاد (اختياري)<input name="birth" type="date"></label>
+<label>أقرب فرع ليك (اختياري)<select name="area"><option value="">اختار الفرع</option><option value="سحب عينة من المنزل">سحب عينة من المنزل</option></select></label></div>
+<label>البريد الإلكتروني (اختياري)<input name="email" type="email" autocomplete="email" dir="ltr"></label>
+<label class="chk"><input type="checkbox" name="offers" checked><span>موافق أستقبل العروض والتذكيرات من برفكت لاب على واتساب، وأقدر ألغي في أي وقت.</span></label>
+<label class="chk"><input type="checkbox" name="ok" required><span>أوافق على استخدام بياناتي للتواصل معي بخصوص خدمات المعمل فقط.</span></label><span class="err" id="r-ok"></span>
+<button class="btn red" type="submit">انضم وابعت بياناتي على واتساب</button>
+<p class="note2s">بعد الضغط هيتفتح واتساب برسالة فيها بياناتك، اضغط إرسال عشان يكمل تسجيلك.</p>
+</form>
+<div id="reg-done" class="regdone" hidden>
+<div class="big-ok" aria-hidden="true">✓</div>
+<h3><span>أهلاً</span> <span id="reg-name"></span><span>، إنت عضو في برفكت لاب</span></h3>
+<p>لو ما بعتّش رسالة الواتساب، ارجع لواتساب واضغط إرسال عشان بياناتك توصلنا.</p>
+<div class="cta" style="justify-content:center"><a class="btn" href="offers.html">شوف العروض</a><a class="btn" href="contact.html">احجز تحليل</a></div>
+<p class="regsmall"><button type="button" class="linkbtn" id="reg-edit">تعديل بياناتي</button> · <button type="button" class="linkbtn" id="reg-out">تسجيل الخروج</button></p>
+</div>
+</div></div></section>
+</main>
+<div id="site-footer"></div>
+<script src="assets/config.js?v=202611111344"></script>
+<script src="assets/main.js?v=202611111344"></script>
+</body>
+</html>
