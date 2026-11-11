@@ -37,6 +37,6 @@ const VIDEOS=[
  {key:"tour",src:"videos/perfect-lab-tour.mp4",title:"جولة في معامل برفكت لاب",text:"فيديو من داخل معامل برفكت لاب: المعمل والأجهزة والزيارات المنزلية."},
  {key:"lab",src:"videos/lab.mp4",title:"المعمل والأجهزة",text:"جولة داخل معمل برفكت لاب والأجهزة المستخدمة في التحاليل."},
  {key:"tests",src:"videos/tests.mp4",title:"التحاليل المتوفرة",text:"كل التحاليل المتوفرة عندنا مصنفة حسب النوع."},
- {key:"home",src:"videos/home-visit.mp4",title:"الزيارة المنزلية",text:"دكتور من برفكت لاب بييجي لحد بيتك يسحب العينة."},
+ {key:"home",src:"videos/home-visit.mp4",title:"الزيارة المنزلية",text:"أخصائي من برفكت لاب بييجي لحد بيتك يسحب العينة."},
  {key:"branches",src:"videos/branches.mp4",title:"فروعنا",text:"تعرف على فروع برفكت لاب وأماكنها."}
 ];
