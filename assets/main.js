@@ -132,7 +132,7 @@ if(mapEl&&listEl){
  };
  listEl.addEventListener("click",e=>{const btn=e.target.closest("button[data-i]");if(!btn)return;const i=+btn.dataset.i;
   listEl.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===btn));
-  if(map){map.flyTo([BR[i].lat,BR[i].lng],14,{duration:.8});marks[i].openPopup();mapEl.scrollIntoView({behavior:"smooth",block:"nearest"})}
+  if(map){map.flyTo([BR[i].lat,BR[i].lng],14,{duration:.8});marks[i].openPopup();mapEl.scrollIntoView({behavior:"smooth",block:"center"})}
   else window.open(`https://www.google.com/maps/search/?api=1&query=${BR[i].lat},${BR[i].lng}`,"_blank","noopener")});
  renderList();onLang.push(renderList);
  const css=document.createElement("link");css.rel="stylesheet";css.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";document.head.appendChild(css);
