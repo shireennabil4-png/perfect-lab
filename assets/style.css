@@ -213,6 +213,11 @@ footer{border-top:5px solid var(--red)}
 .brlist small{display:block;color:var(--muted);line-height:1.6}
 .pinmini{flex:none;width:14px;height:14px;margin-top:6px;border-radius:50% 50% 50% 0;background:var(--red);transform:rotate(-45deg)}
 .mapfull{width:100%;min-height:0;height:clamp(380px,62vh,620px);border-radius:0;border:0;border-top:3px solid var(--red);border-bottom:3px solid var(--red);box-shadow:none;margin:24px 0}
+body[data-page="branches"] .phead{padding:14px 0 12px}
+body[data-page="branches"] .phead p{display:none}
+body[data-page="branches"] .phead h1{margin:0;font-size:clamp(1.4rem,2.8vw,2rem)}
+.map-top{padding-top:0!important}
+.map-top .mapfull{margin-top:0;min-height:340px}
 .brgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;max-height:none;overflow:visible}
 .pinwrap{background:none;border:0}
 .pin{display:block;width:30px;height:30px;border-radius:50% 50% 50% 0;background:var(--red);transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 3px 8px rgba(0,0,0,.35)}

@@ -45,6 +45,13 @@ document.getElementById("site-footer").outerHTML=`<footer><div class="wrap">
 <small>© <span id="yr"></span> برفكت لاب للتحاليل الطبية. جميع الحقوق محفوظة.</small>
 </div></footer>`;
 
+const setHH=()=>document.documentElement.style.setProperty("--hh",document.querySelector("header").offsetHeight+"px");
+setHH();addEventListener("resize",setHH);
+// Branches page: the map fills exactly the space left on screen under the page title
+const fitMap=()=>{const m=document.querySelector(".map-top .mapfull");if(!m)return;
+ const top=m.getBoundingClientRect().top+scrollY;m.style.height=Math.max(340,innerHeight-top-6)+"px"};
+addEventListener("load",fitMap);addEventListener("resize",fitMap);setTimeout(fitMap);
+
 // ===== Fill page content (each part runs only if it exists on the page) =====
 const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fill=(q,html)=>{const el=$(q);if(el)el.innerHTML=html};
