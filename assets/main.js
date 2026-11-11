@@ -15,13 +15,13 @@ const navA=([h,t,p,ic])=>`<a class="nb${ic?" nb-ic":""}${p===PAGE?" active":""}"
 const svcActive=NAV.services.some(x=>x[2]===PAGE);
 document.getElementById("site-header").outerHTML=`<header>
 <div class="wrap bar">
-<a class="brand" href="index.html" aria-label="Perfect Lab – معامل برفكت لاب"><img class="logo" src="assets/logo.png" alt="" width="45" height="56">
+<a class="brand" href="index.html" aria-label="Perfect Lab – معامل برفكت لاب"><img class="logo" src="assets/logo-full.jpg" alt="" width="160" height="160">
 <span class="bname"><span class="bar-ar" lang="ar">معامل برفكت لاب</span><span class="bar-en" lang="en">PERFECT LAB</span></span></a>
 <div class="tools">
 <a class="nb login" id="loginBtn" href="login.html">تسجيل الدخول</a>
 <button class="ib" id="search" type="button" aria-label="بحث" title="بحث" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
 <button class="ib" id="cart" type="button" aria-label="السلة" title="السلة"><span class="cbadge" id="cbadge" hidden>0</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3.5h2.8l2.4 11.2a1 1 0 0 0 1 .8h9.1a1 1 0 0 0 1-.8l1.5-7.4H6.2"/></svg></button>
-<button class="ib" id="bell" type="button" aria-label="الإشعارات" title="الإشعارات"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5.5 2 6.8 2 6.8H4S6 14.5 6 9z"/><path d="M10 19.5a2.2 2.2 0 0 0 4 0"/></svg></button>
+<button class="ib" id="bell" type="button" aria-label="الإشعارات" title="الإشعارات" aria-haspopup="true" aria-expanded="false" aria-controls="npanel"><span class="cbadge" id="nbadge" hidden>0</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5.5 2 6.8 2 6.8H4S6 14.5 6 9z"/><path d="M10 19.5a2.2 2.2 0 0 0 4 0"/></svg></button>
 <button class="lang" id="lang" type="button" aria-label="Change language / تغيير اللغة">عربي</button>
 <button class="menu" id="menu" aria-label="القائمة" aria-expanded="false">☰</button>
 </div>
@@ -161,6 +161,31 @@ const ddSet=o=>{dd.classList.toggle("open",o);ddb.setAttribute("aria-expanded",o
 ddb.onclick=e=>{e.stopPropagation();ddSet(!dd.classList.contains("open"))};
 document.addEventListener("click",e=>{if(!dd.contains(e.target))ddSet(false)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")ddSet(false)});
+
+// ===== Notifications (bell): latest tests and offers =====
+if(typeof NEWS!=="undefined"){
+ const bell=$("#bell"),nb=$("#nbadge"),nid=n=>n.d+"|"+n.ar;
+ let seen=[];try{seen=JSON.parse(localStorage.getItem("plSeen")||"[]")}catch(e){}
+ const unread=()=>NEWS.filter(n=>!seen.includes(nid(n))).length;
+ const upd=()=>{const u=unread();nb.textContent=u;nb.hidden=!u};
+ document.body.insertAdjacentHTML("beforeend",`<div class="npanel" id="npanel" hidden><div class="nph"><b id="npt"></b><button type="button" class="srch-x" id="npx">✕</button></div><ul class="nlist" id="nlist"></ul><a class="btn wa nsub" id="nsub" target="_blank" rel="noopener"></a></div>`);
+ const P=$("#npanel");
+ const draw=()=>{const E=document.documentElement.lang==="en";
+  $("#npt").textContent=E?"What's new at Perfect Lab":"الجديد في برفكت لاب";$("#npx").setAttribute("aria-label",E?"Close":"إغلاق");
+  $("#nlist").innerHTML=NEWS.map(n=>{const nw=!seen.includes(nid(n));const dt=new Date(n.d+"T12:00:00").toLocaleDateString(E?"en-GB":"ar-EG",{day:"numeric",month:"long"});
+   return `<li class="${nw?"new":""}"><a href="${esc(n.href)}"><span class="nico" aria-hidden="true">${n.ic}</span><span><b>${esc(E?n.en:n.ar)}${nw?`<em>${E?"New":"جديد"}</em>`:""}</b><small>${esc(E?n.den:n.dar)}</small><time>${dt}</time></span></a></li>`}).join("");
+  const sub=$("#nsub");sub.textContent=E?"Get new tests & offers on WhatsApp":"وصّلني الجديد على واتساب";
+  sub.href=C.whatsapp?"https://wa.me/"+C.whatsapp+"?text="+encodeURIComponent("عايز أشترك في إشعارات برفكت لاب: التحاليل الجديدة والعروض"+(MEMBER&&MEMBER.name?`\nالاسم: ${MEMBER.name}\nالهاتف: ${MEMBER.phone}`:"")):"contact.html";
+  const u=unread();bell.setAttribute("aria-label",(E?"Notifications":"الإشعارات")+(u?` (${u})`:""))};
+ const place=()=>{const r=bell.getBoundingClientRect(),w=Math.min(380,innerWidth-24);P.style.width=w+"px";P.style.top=(r.bottom+10)+"px";let l=r.left+r.width/2-w/2;P.style.left=Math.max(12,Math.min(l,innerWidth-w-12))+"px"};
+ const close=()=>{P.hidden=true;bell.setAttribute("aria-expanded","false")};
+ bell.onclick=e=>{e.stopPropagation();if(!P.hidden){close();return}draw();place();P.hidden=false;bell.setAttribute("aria-expanded","true");
+  seen=NEWS.map(nid);try{localStorage.setItem("plSeen",JSON.stringify(seen))}catch(e){};upd()};
+ $("#npx").onclick=close;document.addEventListener("click",e=>{if(!P.hidden&&!P.contains(e.target))close()});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!P.hidden){close();bell.focus()}});
+ addEventListener("resize",()=>{if(!P.hidden)place()});addEventListener("scroll",()=>{if(!P.hidden)place()},{passive:true});
+ upd();onLangLate.push(()=>{if(!P.hidden)draw();else{const E=document.documentElement.lang==="en",u=unread();bell.setAttribute("aria-label",(E?"Notifications":"الإشعارات")+(u?` (${u})`:""))}});
+}
 
 // ===== Cart (tests chosen on this device) =====
 let CART=[];try{CART=JSON.parse(localStorage.getItem("plCart")||"[]")}catch(e){}

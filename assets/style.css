@@ -128,10 +128,10 @@ a.card .more{display:inline-block;margin-top:10px;color:var(--primary);font-weig
 header{border-top:5px solid var(--red);border-bottom:0;box-shadow:0 4px 18px rgba(11,95,165,.12)}
 .bar{min-height:92px;justify-content:space-between}
 .brand{gap:14px}
-.logo{height:68px}
+.logo{height:92px;width:92px;border-radius:50%;object-fit:cover}
 .bname{display:flex;flex-direction:column;line-height:1.15}
-.bar-ar{font-family:Cairo,Tahoma,sans-serif;font-size:clamp(1.25rem,2.6vw,2rem);font-weight:800;color:var(--primary)}
-.bar-en{font-size:clamp(.95rem,1.9vw,1.4rem);font-weight:800;letter-spacing:.14em;color:var(--red)}
+.bar-ar{font-family:Cairo,Tahoma,sans-serif;font-size:clamp(1.6rem,3.4vw,2.7rem);line-height:1.15;font-weight:800;color:var(--primary)}
+.bar-en{font-size:clamp(1.05rem,2.2vw,1.65rem);font-weight:800;letter-spacing:.14em;color:var(--red)}
 .tools{margin-inline-start:0}
 .navbar{background:var(--blue);border-bottom:3px solid var(--red)}
 .navbar nav{margin:0;gap:4px;min-height:54px}
@@ -267,6 +267,16 @@ body[data-page="branches"] .phead h1{margin:0;font-size:clamp(1.4rem,2.8vw,2rem)
 .ib{position:relative}
 .cbadge{position:absolute;top:-6px;inset-inline-end:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--red);color:#fff;font-size:.72rem;font-weight:800;display:grid;place-items:center;border:2px solid #fff;line-height:1}
 .cbadge[hidden]{display:none}
+.npanel{position:fixed;z-index:1200;background:var(--surface,#fff);border:1px solid var(--line);border-top:4px solid var(--red);border-radius:18px;box-shadow:0 18px 50px rgba(10,40,80,.25);padding:14px;max-height:min(70vh,560px);overflow:auto}
+.npanel[hidden]{display:none}
+.nph{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.nph b{color:var(--primary);font-size:1.1rem}
+.nlist{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:6px}
+.nlist a{display:flex;gap:12px;padding:10px;border-radius:12px;text-decoration:none;color:var(--text)}
+.nlist a:hover{background:var(--soft)}.nlist li.new a{background:#fdf0f0}
+.nico{flex:none;width:40px;height:40px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-size:1.2rem}
+.nlist b{display:block;color:var(--primary);font-size:.95rem}.nlist em{font-style:normal;font-size:.7rem;background:var(--red);color:#fff;border-radius:999px;padding:1px 8px;margin-inline-start:8px;vertical-align:middle}
+.nlist small{display:block;color:var(--text);line-height:1.6;margin-top:2px}.nlist time{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
+.nsub{width:100%;justify-content:center;text-align:center;box-sizing:border-box}
 .cartbox{background:var(--surface);border:2px solid var(--blue);border-radius:20px;padding:18px 20px;margin-bottom:22px;box-shadow:var(--shadow);scroll-margin-top:calc(var(--hh,150px) + 16px);transition:box-shadow .3s}
 .cartbox.flash{box-shadow:0 0 0 6px rgba(215,25,31,.25)}
 .cbh h2{margin:0 0 10px;font-size:1.3rem;padding:0}.cbh h2::after{display:none}
@@ -308,5 +318,5 @@ body[data-page="branches"] .phead h1{margin:0;font-size:clamp(1.4rem,2.8vw,2rem)
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .brlist button:hover,:root:not([data-theme="light"]) .brlist button.on{background:#2a1416}}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--blue:#123d66}:root:not([data-theme="light"]) .ib,:root:not([data-theme="light"]) .lang{background:transparent;color:#cfe4f7;border-color:#4aa3e8}:root:not([data-theme="light"]) .bar-ar{color:#cfe4f7}:root:not([data-theme="light"]) .tag{background:#3a1416;color:#ff8a8d}}
 @media(max-width:900px){.navbar{border-bottom:0}.navbar .wrap{padding:0}.navbar nav{position:static;display:none;background:var(--blue);padding:10px 16px 16px;border-bottom:3px solid var(--red);min-height:0}.navbar nav.open{display:flex}.navbar .dd-m{background:#fff;border-radius:10px}.navbar .dd>.nb:first-child{flex:1}}
-@media(max-width:600px){.bar{flex-wrap:wrap;min-height:0;gap:8px;padding:10px 14px}.brand{gap:10px}.logo{height:50px}.bname{white-space:nowrap}.bar-ar{font-size:1.35rem}.bar-en{font-size:.95rem;letter-spacing:.1em}.tools{width:100%;justify-content:flex-end;gap:6px}.tools .menu{margin-inline-start:auto;order:-1}.nb.login{padding:6px 12px;font-size:.85rem}}
+@media(max-width:600px){.bar{flex-wrap:wrap;min-height:0;gap:8px;padding:10px 14px}.brand{gap:10px}.logo{height:64px;width:64px}.bname{white-space:nowrap}.bar-ar{font-size:1.6rem}.bar-en{font-size:.95rem;letter-spacing:.1em}.tools{width:100%;justify-content:flex-end;gap:6px}.tools .menu{margin-inline-start:auto;order:-1}.nb.login{padding:6px 12px;font-size:.85rem}}
 
