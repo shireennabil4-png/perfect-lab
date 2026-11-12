@@ -2,7 +2,7 @@
 // To add a page: add it to NAV and put <body data-page="key"> in the page.
 const NAV={
  main:[["index.html","الرئيسية","home"]],
- services:[["tests.html","التحاليل والتحضير","tests"],["services.html","التحاليل","services"],["offers.html","العروض","offers"],["prepare.html","التحضير للتحليل","prepare"],["faq.html","الأسئلة الشائعة","faq"],["contact.html","الروشتة","rx"]],
+ services:[["tests.html","التحاليل","tests"],["offers.html","العروض","offers"],["prepare.html","التحضير للتحليل","prepare"],["faq.html","الأسئلة الشائعة","faq"],["contact.html","الروشتة","rx"]],
  after:[["branches.html","الفروع","branches"],["home-collection.html","الزيارة المنزلية","home-collection"],["contact.html","اتصل بنا","contact","call"],["about.html","عن برفكت","about"]]
 };
 const PAGE=document.body.dataset.page||"";
@@ -153,6 +153,67 @@ if(mapEl&&listEl){
  document.head.appendChild(sc);
 }
 
+// ===== Branches page: list + area/address search + one page per branch =====
+const blList=$("#bl-list");
+if(blList&&C.branches){
+ const BRS=C.branches,isEn=()=>document.documentElement.lang==="en";
+ const qa=$("#bl-area"),qd=$("#bl-addr");
+ const nrm=x=>String(x||"").replace(/[ً-ْـ]/g,"").replace(/[أإآٱ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/(^|\s)ال/g,"$1").toLowerCase().replace(/[^\w؀-ۿ]+/g," ").trim();
+ const has=(text,q)=>{const t=nrm(text);return nrm(q).split(" ").filter(Boolean).every(w=>t.includes(w))};
+ const nm=b=>isEn()?b.en:b.n,ar=b=>isEn()?b.area_en:b.area,ad=b=>isEn()&&b.address_en?b.address_en:b.address;
+ const AREAS=[...new Set(BRS.map(b=>b.area))];
+ const mapQ=b=>`${b.address.replace(/–/g,"،")}، ${b.gov||""}، مصر`;
+ const gLink=b=>b.map||`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQ(b))}`;
+ const gEmbed=b=>`https://maps.google.com/maps?q=${encodeURIComponent(b.map_q||mapQ(b))}&hl=${isEn()?"en":"ar"}&z=16&output=embed`;
+ const tel=p=>"+2"+p;
+ const hl=(text,q)=>{const ws=nrm(q).split(" ").filter(Boolean);if(!ws.length)return esc(text);
+  return String(text).split(/(\s+|–|,|،)/).map(tok=>{const n=nrm(tok);return n&&ws.some(w=>n.includes(w))?`<mark>${esc(tok)}</mark>`:esc(tok)}).join("")};
+ const labels=()=>{const E=isEn();
+  $("#bl-area-l").textContent=E?"Search by area":"ابحث باسم المنطقة";
+  $("#bl-addr-l").textContent=E?"Search by address":"ابحث بالعنوان";
+  qa.placeholder=E?"e.g. Maadi, Helwan, October…":"مثلاً: المعادي، حلوان، أكتوبر…";
+  qd.placeholder=E?"Street, square or landmark…":"اسم شارع، ميدان، علامة مميزة…";
+  $("#bl-clear").textContent=E?"Clear search":"مسح البحث";
+  $("#bl-chips-t").textContent=E?"Areas":"المناطق";
+  $("#bl-back").textContent=E?"← Back to all branches":"→ رجوع لكل الفروع";
+  $("#bl-areas").innerHTML=AREAS.map(a=>`<option value="${esc(a)}">`).join("");
+ };
+ const drawChips=()=>{const cur=nrm(qa.value),E=isEn();
+  $("#bl-chips").innerHTML=`<button type="button" class="tcat${!cur?" on":""}" data-a="">${E?"All branches":"كل الفروع"}</button>`+
+   AREAS.map(a=>{const b=BRS.find(x=>x.area===a);return `<button type="button" class="tcat${cur===nrm(a)?" on":""}" data-a="${esc(a)}">${esc(E?b.area_en:a)}</button>`}).join("")};
+ const rows=()=>BRS.filter(b=>(!qa.value.trim()||has(b.area+" "+b.area_en+" "+b.n+" "+b.en+" "+(b.k||""),qa.value))&&(!qd.value.trim()||has(b.address+" "+(b.address_en||"")+" "+b.n+" "+(b.k||""),qd.value)));
+ const drawList=()=>{const r=rows(),E=isEn(),a=qa.value.trim(),d=qd.value.trim();
+  $("#bl-count").textContent=E?`${r.length} branches`:`${r.length} فرع`;
+  blList.innerHTML=r.length?r.map(b=>`<li><a class="blrow" href="#branch-${b.id}">
+   <span class="blnum">${b.id}</span><span class="bltx"><b>${hl(nm(b),a||d)}</b><small>${hl(ad(b),d||a)}</small><span class="blph">${E?"Phone":"تليفون"}: <span dir="ltr">${esc(b.phone)}</span></span></span>
+   <span class="blgo">${E?"View →":"عرض ←"}</span></a></li>`).join(""):
+   `<li class="tnone">${E?"No branch matches your search. Message us on WhatsApp and we'll help.":"مفيش فرع مطابق للبحث ده. كلّمنا على واتساب وهنساعدك."}</li>`;
+  drawChips()};
+ const drawOne=b=>{const E=isEn();
+  $("#bl-one").innerHTML=`<div class="blcard"><div class="blinfo">
+   <h2><span class="blnum">${b.id}</span>${esc(E?b.en+" Branch":"فرع "+b.n)}</h2>
+   <div class="bllbl">${E?"Address":"العنوان"}</div><p class="blval">${esc(ad(b))}${b.gov&&!E?" – "+esc(b.gov):""}</p>
+   <div class="bllbl">${E?"Phone":"التليفون"}</div><p class="blval" dir="ltr">${esc(b.phone)}</p>
+   ${C.hours?`<div class="bllbl">${E?"Hours":"المواعيد"}</div><p class="blval">${esc(T(C.hours))}</p>`:""}
+   <div class="blacts"><a class="btn red" href="${esc(gLink(b))}" target="_blank" rel="noopener">${E?"Open in Google Maps":"افتح في خرائط جوجل"}</a>
+   <a class="btn ghost" href="tel:${tel(b.phone)}">${E?"Call":"اتصال"}</a>
+   <a class="btn wa" href="https://wa.me/2${esc(b.phone)}" target="_blank" rel="noopener">${E?"WhatsApp":"واتساب"}</a></div></div>
+   <iframe class="blmap" src="${gEmbed(b)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="${E?"Branch location map":"موقع الفرع على الخريطة"}"></iframe></div>`};
+ const route=()=>{const m=location.hash.match(/^#branch-(\d+)$/),b=m&&BRS.find(x=>x.id===+m[1]);
+  $("#bl-view-list").hidden=!!b;$("#bl-view-one").hidden=!b;
+  if(b){drawOne(b);window.scrollTo(0,0)}};
+ qa.addEventListener("input",drawList);qd.addEventListener("input",drawList);
+ $("#bl-chips").addEventListener("click",e=>{const c=e.target.closest(".tcat");if(!c)return;qa.value=c.dataset.a;drawList()});
+ $("#bl-clear").onclick=()=>{qa.value="";qd.value="";drawList()};
+ $("#bl-form").addEventListener("submit",e=>e.preventDefault());
+ $("#bl-back").onclick=e=>{e.preventDefault();if(/^#branch-/.test(location.hash)&&history.length>1)history.back();else{history.replaceState(null,"",location.pathname+location.search);route()}};
+ // links from the site search: branches.html?area=…  ?q=…  #branch-3
+ try{const p=new URLSearchParams(location.search);if(p.get("area"))qa.value=p.get("area");if(p.get("q"))qd.value=p.get("q")}catch(e){}
+ addEventListener("hashchange",route);
+ const all=()=>{labels();drawList();route()};
+ onLangLate.push(all);
+}
+
 // ===== Mobile menu & services dropdown =====
 const nav=$("#nav"),mb=$("#menu");
 mb.onclick=()=>{const o=nav.classList.toggle("open");mb.setAttribute("aria-expanded",o)};
@@ -206,54 +267,96 @@ if(MEMBER&&MEMBER.name){const lb=$("#loginBtn");lb.innerHTML=`<span class="hi">�
   const strip=x=>String(x).replace(/<[^>]+>/g,"").trim();
   SV.forEach(x=>{const d=strip(x[2]);out.push({t:L(x[1]),d:L(d)===d?L(x[2]):L(d),a:x[1]+" "+d,h:"services.html",ic:x[0]})});
   C.offers.forEach(o=>out.push({t:L(o.n),d:(o.price?o.price+" "+L("جنيه"):(o.discount?L(o.discount):""))+(o.tests?" · "+o.tests.map(L).join(en?", ":"، "):""),a:o.n+" "+(o.tests||[]).join(" "),h:"offers.html",ic:"🎁"}));
-  C.branches.forEach(b=>out.push({t:en?(b.en||b.n)+" Branch":"فرع "+b.n,d:(en&&b.address_en)?b.address_en:(b.address||""),a:"فرع "+b.n+" "+(b.en||"")+" "+(b.address||"")+" "+(b.address_en||""),h:"branches.html",ic:"📍"}));
+  if(typeof TESTS!=="undefined")TESTS.forEach(t=>out.push({t:en?t.en:t.ar,d:t.code+" · "+(en?(TFAST[t.f]||{}).en:(TFAST[t.f]||{}).ar),a:t.ar+" "+t.en+" "+t.code+" تحليل",h:"tests.html#test-"+t.code.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""),ic:"🧪"}));
+  [...new Set(C.branches.map(b=>b.area).filter(Boolean))].forEach(ar=>{const b=C.branches.find(x=>x.area===ar),n=C.branches.filter(x=>x.area===ar).length;out.push({t:en?`Branches in ${b.area_en}`:`فروع ${ar}`,d:en?`${n} branch(es)`:`${n} فرع`,a:"فروع فرع منطقه "+ar+" "+(b.area_en||"")+" "+(b.k||""),h:"branches.html?area="+encodeURIComponent(ar),ic:"🗺️"})});
+  C.branches.forEach(b=>out.push({t:en?(b.en||b.n)+" Branch":"فرع "+b.n,d:(en&&b.address_en)?b.address_en:(b.address||""),a:"فرع "+b.n+" "+(b.en||"")+" "+(b.address||"")+" "+(b.address_en||"")+" "+(b.k||""),h:b.id?"branches.html#branch-"+b.id:"branches.html",ic:"📍"}));
   C.faq.forEach(f=>out.push({t:L(f[0]),d:L(f[1]),a:f[0]+" "+f[1],h:"faq.html",ic:"❓"}));
   [["home-collection.html","الزيارة المنزلية","🏠"],["prepare.html","التحضير للتحليل","📝"],["contact.html","اتصل بنا","📞"],["about.html","عن برفكت","🔬"]].forEach(([h,t,ic])=>out.push({t:L(t),d:"",a:t,h,ic}));
   return out};
  const draw=()=>{const v=norm(q.value.trim());if(!v){res.innerHTML="";empty.hidden=true;return}
-  const words=v.split(/\s+/);const hits=idx().filter(x=>{const hay=norm(x.t+" "+x.d+" "+(x.a||""));return words.every(w=>hay.includes(w))}).slice(0,12);
+  const words=v.split(/\s+/);const hits=idx().filter(x=>{const hay=norm(x.t+" "+x.d+" "+(x.a||""));return words.every(w=>hay.includes(w))}).map(x=>[x,words.filter(w=>norm(x.t).includes(w)).length]).sort((a,b)=>b[1]-a[1]||(b[1]?a[0].t.length-b[0].t.length:0)).map(x=>x[0]).slice(0,12);
   res.innerHTML=hits.map(x=>`<li><a href="${x.h}"><span aria-hidden="true">${x.ic}</span><span><b>${esc(x.t)}</b>${x.d?`<small>${esc(x.d)}</small>`:""}</span></a></li>`).join("");
   empty.hidden=hits.length>0};
  const open=()=>{box.hidden=false;document.body.style.overflow="hidden";q.value="";draw();setTimeout(()=>q.focus(),30)};
  const close=()=>{box.hidden=true;document.body.style.overflow="";opener.focus()};
  opener.onclick=open;$("#srch-x").onclick=close;q.addEventListener("input",draw);
- box.addEventListener("click",e=>{if(e.target===box)close()});
+ box.addEventListener("click",e=>{if(e.target===box)close();else if(e.target.closest("#srch-res a")){box.hidden=true;document.body.style.overflow=""}});
  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!box.hidden)close();if(e.key==="/"&&box.hidden&&!/input|textarea|select/i.test(document.activeElement.tagName)){e.preventDefault();open()}});
  onLangLate.push(()=>{q.placeholder=T("ابحث عن تحليل أو عرض أو فرع…");q.setAttribute("aria-label",T("ابحث في الموقع"));opener.setAttribute("aria-label",T("بحث"));opener.title=T("بحث");$("#srch-x").setAttribute("aria-label",T("إغلاق"));draw()});
 }
 
-// ===== Tests & preparation catalog =====
+// ===== Tests: list + search beside it + one page per test (cart kept) =====
 const tlist=$("#tlist");
 if(tlist&&typeof TESTS!=="undefined"){
  let cat="all";const tq=$("#tq");
  const en=()=>document.documentElement.lang==="en";
  const key=t=>t.code;
- const drawCats=()=>{$("#tcats").innerHTML=[{k:"all",ar:"الكل",en:"All",ic:"🔎"},...TCATS].map(c=>`<button type="button" class="tcat${c.k===cat?" on":""}" data-k="${c.k}" aria-pressed="${c.k===cat}"><span aria-hidden="true">${c.ic}</span>${esc(en()?c.en:c.ar)}</button>`).join("")};
- const norm=x=>String(x).toLowerCase().replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي");
- const drawList=()=>{const q=norm(tq.value.trim()),E=en();
-  const rows=TESTS.filter(t=>(cat==="all"||t.c===cat)&&(!q||norm(t.ar+" "+t.en+" "+t.code+" "+t.par+" "+t.pen).includes(q)));
-  tlist.innerHTML=rows.length?rows.map(t=>{const inC=CART.includes(key(t)),fs=TFAST[t.f];
-   return `<article class="tcard"><div class="thead"><div><h3>${esc(E?t.en:t.ar)}</h3><span class="tcode" dir="ltr">${esc(t.code)}</span></div>
-   <button type="button" class="tadd${inC?" in":""}" data-code="${esc(t.code)}" aria-pressed="${inC}">${inC?(E?"✓ In cart":"✓ في السلة"):(E?"+ Add to cart":"+ أضف للسلة")}</button></div>
-   <div class="tbadges"><span class="tb s">${esc(E?t.sen:t.sar)}</span><span class="tb f-${t.f}">${esc(E?fs.en:fs.ar)}</span></div>
-   <p class="tprep"><b>${E?"How to prepare:":"التحضير:"}</b> ${esc(E?t.pen:t.par)}</p></article>`}).join(""):`<p class="tnone">${E?"No test matches your search. Message us on WhatsApp and we'll help.":"مفيش تحليل بالاسم ده. كلّمنا على واتساب وهنساعدك."}</p>`;
+ const slug=c=>c.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+ const bySlug=s=>TESTS.find(t=>slug(t.code)===s);
+ const norm=x=>String(x||"").toLowerCase().replace(/[ً-ْـ]/g,"").replace(/[أإآٱ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/(^|\s)ال/g,"$1");
+ const hay=t=>norm([t.ar,t.en,t.code,t.w,t.we].join(" "));
+ const score=(t,q)=>{const ws=norm(q).split(/\s+/).filter(Boolean);if(!ws.length)return 1;const h=hay(t);if(!ws.every(w=>h.includes(w)))return 0;
+  const n=norm(t.ar+" "+t.code+" "+t.en);let s=1;ws.forEach(w=>{if(n.includes(w))s+=3;if(norm(t.ar).startsWith(w)||norm(t.code)===w)s+=5});return s+(t.p?1:0)};
+ const CATS=()=>[{k:"all",ar:"الكل",en:"All",ic:"🔎"},{k:"pop",ar:"الأكثر طلبًا",en:"Most requested",ic:"⭐"},...TCATS];
+ const drawCats=()=>{$("#tcats").innerHTML=CATS().map(c=>`<button type="button" class="tcat${c.k===cat?" on":""}" data-k="${c.k}" aria-pressed="${c.k===cat}"><span aria-hidden="true">${c.ic}</span>${esc(en()?c.en:c.ar)}</button>`).join("")};
+ const badges=t=>{const E=en(),fs=TFAST[t.f];return `${t.p?`<span class="tb pop">${E?"Most requested":"الأكثر طلبًا"}</span>`:""}<span class="tb s">${esc(E?t.sen:t.sar)}</span><span class="tb f-${t.f}">${esc(E?fs.en:fs.ar)}</span>`};
+ const cartBtn=t=>{const inC=CART.includes(key(t)),E=en();return `<button type="button" class="tadd${inC?" in":""}" data-code="${esc(t.code)}" aria-pressed="${inC}">${inC?(E?"✓ In cart":"✓ في السلة"):(E?"+ Add to cart":"+ أضف للسلة")}</button>`};
+ const drawList=()=>{const q=tq.value.trim(),E=en();
+  let rows=TESTS.filter(t=>cat==="all"||(cat==="pop"?t.p:t.c===cat));
+  if(q)rows=rows.map(t=>[t,score(t,q)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+  tlist.innerHTML=rows.length?rows.map(t=>`<article class="tcard trow"><a class="tlink" href="#test-${slug(t.code)}">
+   <span class="tcode" dir="ltr">${esc(t.code)}</span><span class="ttx"><h3>${esc(E?t.en:t.ar)}</h3><small>${esc(E?t.ar:t.en)}</small>
+   <span class="tsum">${esc(E?t.we:t.w)}</span><span class="tbadges">${badges(t)}</span></span></a>
+   <div class="tside">${cartBtn(t)}<a class="tmore" href="#test-${slug(t.code)}">${E?"Details →":"التفاصيل ←"}</a></div></article>`).join(""):
+   `<p class="tnone">${E?"No test matches your search. Message us on WhatsApp and we'll help.":"مفيش تحليل بالاسم ده. كلّمنا على واتساب وهنساعدك."}</p>`;
   $("#tcount").textContent=E?`${rows.length} tests`:`${rows.length} تحليل`};
+ const drawOne=t=>{const E=en(),rel=TESTS.filter(x=>x.c===t.c&&x!==t).slice(0,6),c=TCATS.find(x=>x.k===t.c);
+  const wa=C.whatsapp?"https://wa.me/"+C.whatsapp+"?text="+encodeURIComponent(`عايز أحجز تحليل: ${t.ar} (${t.code})`):"contact.html";
+  $("#tone").innerHTML=`<article class="tdet">
+   <div class="tdh"><span class="tcode big" dir="ltr">${esc(t.code)}</span><div><h2>${esc(E?t.en:t.ar)}</h2><p class="tden">${esc(E?t.ar:t.en)}</p></div></div>
+   <div class="tbadges">${badges(t)}${c?`<span class="tb s">${c.ic} ${esc(E?c.en:c.ar)}</span>`:""}</div>
+   <h3>${E?"What does this test show?":"التحليل ده بيكشف عن إيه؟"}</h3><p>${esc(E?t.we:t.w)}</p>
+   <h3>${E?"How to prepare":"التحضير قبل التحليل"}</h3><p>${esc(E?t.pen:t.par)}</p>
+   <h3>${E?"Sample":"نوع العينة"}</h3><p>${esc(E?t.sen:t.sar)}</p>
+   <div class="tacts">${cartBtn(t)}<a class="btn wa" href="${esc(wa)}" target="_blank" rel="noopener">${E?"Book this test on WhatsApp":"احجز التحليل ده على واتساب"}</a>
+   <a class="btn ghost" href="branches.html">${E?"Nearest branch":"أقرب فرع"}</a>
+   <button type="button" class="btn ghost" id="tcopy">${E?"Copy link":"انسخ لينك التحليل"}</button></div>
+   ${rel.length?`<h3>${E?"Related tests":"تحاليل مرتبطة"}</h3><div class="trel">${rel.map(x=>`<a href="#test-${slug(x.code)}"><b>${esc(E?x.en:x.ar)}</b> <small dir="ltr">${esc(x.code)}</small></a>`).join("")}</div>`:""}
+  </article>`;
+  $("#tcopy").onclick=e=>{const u=location.href.split("#")[0]+"#test-"+slug(t.code),b=e.currentTarget;
+   (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{b.textContent=E?"✓ Copied":"✓ اتنسخ"}).catch(()=>{b.textContent=u})}};
+ const route=()=>{const m=location.hash.match(/^#test-([\w-]+)$/),t=m&&bySlug(m[1]);
+  $("#tview-list").hidden=!!t;$("#tview-one").hidden=!t;
+  if(t){drawOne(t);window.scrollTo(0,0)}};
  const drawCart=()=>{const E=en(),items=CART.map(c=>TESTS.find(t=>t.code===c)).filter(Boolean);
-  $("#cartlist").innerHTML=items.length?items.map(t=>`<li><span><b>${esc(E?t.en:t.ar)}</b> <small dir="ltr">${esc(t.code)}</small></span><button type="button" class="crm" data-code="${esc(t.code)}" aria-label="${E?"Remove":"شيل"} ${esc(E?t.en:t.ar)}">✕</button></li>`).join(""):`<li class="cempty">${E?"Your cart is empty. Add the tests you need from the list below.":"السلة فاضية. اختار التحاليل اللي محتاجها من القايمة اللي تحت."}</li>`;
+  $("#cartlist").innerHTML=items.length?items.map(t=>`<li><span><b>${esc(E?t.en:t.ar)}</b> <small dir="ltr">${esc(t.code)}</small></span><button type="button" class="crm" data-code="${esc(t.code)}" aria-label="${E?"Remove":"شيل"} ${esc(E?t.en:t.ar)}">✕</button></li>`).join(""):`<li class="cempty">${E?"Your cart is empty. Add the tests you need from the list.":"السلة فاضية. اختار التحاليل اللي محتاجها من القايمة."}</li>`;
   const fast=items.filter(t=>t.f!=="none"&&t.f!=="special"),longest=fast.some(t=>t.f==="f9")?"f9":fast.some(t=>t.f==="f8")?"f8":fast.some(t=>t.f==="f6")?"f6":fast.length?"f4":null;
   $("#cartfast").innerHTML=items.length?(longest?`⏰ ${E?"Before your visit: ":"قبل الزيارة: "}<b>${esc(E?TFAST[longest].en:TFAST[longest].ar)}</b>${E?" (the longest fasting among your tests).":" (أطول صيام بين التحاليل اللي اخترتها)."}`:(E?"✓ None of your tests needs fasting.":"✓ مفيش تحليل من اللي اخترتهم محتاج صيام.")):"";
   $("#cartact").hidden=!items.length};
- const draw=()=>{drawCats();drawList();drawCart()};
+ const labels=()=>{const E=en();
+  tq.placeholder=E?"Test name or code, e.g. CBC, sugar, allergy":"اسم التحليل أو الكود، مثلاً CBC أو سكر أو حساسية";
+  $("#tq-l").textContent=E?"Search for a test":"ابحث عن تحليل";$("#tcats-l").textContent=E?"Categories":"الأقسام";
+  $("#tback").textContent=E?"← Back to all tests":"→ رجوع لكل التحاليل"};
+ const draw=()=>{labels();drawCats();drawList();drawCart();route()};
  $("#tcats").addEventListener("click",e=>{const b=e.target.closest(".tcat");if(b){cat=b.dataset.k;drawCats();drawList()}});
- tq.addEventListener("input",drawList);
- tlist.addEventListener("click",e=>{const b=e.target.closest(".tadd");if(!b)return;const c=b.dataset.code;CART=CART.includes(c)?CART.filter(x=>x!==c):[...CART,c];saveCart()});
+ tq.addEventListener("input",()=>{if(!$("#tview-one").hidden)history.replaceState(null,"",location.pathname+location.search),route();drawList()});
+ tq.addEventListener("keydown",e=>{if(e.key!=="Enter")return;e.preventDefault();const q=tq.value.trim();if(!q)return;
+  const best=TESTS.map(t=>[t,score(t,q)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1])[0];
+  if(best)location.hash="test-"+slug(best[0].code);
+  else{const b=(C.branches||[]).find(x=>norm(x.area+" "+x.n+" "+(x.k||"")).includes(norm(q)));if(b)location.href="branches.html?area="+encodeURIComponent(b.area)}});
+ const toggle=c=>{CART=CART.includes(c)?CART.filter(x=>x!==c):[...CART,c];saveCart()};
+ document.addEventListener("click",e=>{const b=e.target.closest(".tadd");if(!b||!b.dataset.code)return;e.preventDefault();toggle(b.dataset.code)});
  $("#cartlist").addEventListener("click",e=>{const b=e.target.closest(".crm");if(!b)return;CART=CART.filter(x=>x!==b.dataset.code);saveCart()});
  $("#cartclear").onclick=()=>{CART=[];saveCart()};
+ $("#tback").onclick=e=>{e.preventDefault();if(/^#test-/.test(location.hash)&&history.length>1)history.back();else{history.replaceState(null,"",location.pathname+location.search);route()}};
  $("#cartbook").onclick=()=>{const items=CART.map(c=>TESTS.find(t=>t.code===c)).filter(Boolean);if(!items.length)return;
   const who=MEMBER&&MEMBER.name?`\nالاسم: ${MEMBER.name}\nالهاتف: ${MEMBER.phone}`:"";
   const t=`طلب حجز تحاليل – برفكت لاب${who}\nالتحاليل:\n${items.map((x,i)=>`${i+1}. ${x.ar} (${x.code})`).join("\n")}\nعايز أعرف السعر والميعاد المتاح.`;
   const url=C.whatsapp?"https://wa.me/"+C.whatsapp+"?text="+encodeURIComponent(t):"contact.html";if(!window.open(url,"_blank"))location.href=url};
- onCart.push(()=>{drawList();drawCart()});onLangLate.push(()=>{tq.placeholder=en()?"Search by test name or code, e.g. CBC or sugar":"ابحث باسم التحليل أو الكود، مثلاً CBC أو سكر";draw()});
+ addEventListener("hashchange",route);
+ onCart.push(()=>{drawList();drawCart();const m=location.hash.match(/^#test-([\w-]+)$/),t=m&&bySlug(m[1]);if(t&&!$("#tview-one").hidden)drawOne(t)});
+ onLangLate.push(draw);
+ if(location.hash==="#cartbox")setTimeout(()=>$("#cartbox").scrollIntoView({block:"start"}),50);
 }
 const gl=$("#prepgen");
 if(gl&&typeof TGENERAL!=="undefined"){const drawG=()=>{const E=document.documentElement.lang==="en";gl.innerHTML=TGENERAL.map((g,i)=>`<div class="pg"><span class="pgn">${i+1}</span><div><h3>${esc(E?g.en:g.ar)}</h3><p>${esc(E?g.den:g.dar)}</p></div></div>`).join("")};onLangLate.push(drawG)}
