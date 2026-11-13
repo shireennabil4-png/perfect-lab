@@ -389,3 +389,15 @@ mark{background:#ffe3a3;color:inherit;border-radius:3px;padding:0 1px}
 .tmain .tlist{grid-template-columns:1fr}
 .tmain .tcard.trow{flex-direction:row;padding:0;gap:0}
 @media (max-width:900px){.tmain .tcard.trow{flex-direction:column}}
+
+/* ===== Branches: search + map + address side by side ===== */
+.bltop{display:grid;grid-template-columns:340px minmax(0,1fr);gap:20px;align-items:stretch;margin-bottom:24px}
+.blsel{display:grid;grid-template-columns:minmax(0,1fr) 320px;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);min-height:460px}
+.blsel .blmap{min-height:460px;height:100%}
+.blsel .blinfo{padding:20px;border-inline-start:1px solid var(--line)}
+.blsel .blinfo h2{font-size:1.25rem}
+.blempty{grid-column:1/-1;display:grid;place-items:center;color:var(--muted);font-weight:700;padding:20px;text-align:center}
+.blrow.on{border-color:var(--red);background:#fff5f5;box-shadow:inset 4px 0 0 var(--red)}
+.bltop+.tcount{margin-top:0}
+@media (max-width:1180px){.blsel{grid-template-columns:1fr}.blsel .blmap{min-height:340px}.blsel .blinfo{border-inline-start:0;border-top:1px solid var(--line)}}
+@media (max-width:900px){.bltop{grid-template-columns:1fr}.blsel{scroll-margin-top:calc(var(--hh,140px) + 12px)}}

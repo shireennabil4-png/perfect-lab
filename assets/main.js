@@ -175,42 +175,47 @@ if(blList&&C.branches){
   qd.placeholder=E?"Street, square or landmark…":"اسم شارع، ميدان، علامة مميزة…";
   $("#bl-clear").textContent=E?"Clear search":"مسح البحث";
   $("#bl-chips-t").textContent=E?"Areas":"المناطق";
-  $("#bl-back").textContent=E?"← Back to all branches":"→ رجوع لكل الفروع";
   $("#bl-areas").innerHTML=AREAS.map(a=>`<option value="${esc(a)}">`).join("");
  };
  const drawChips=()=>{const cur=nrm(qa.value),E=isEn();
   $("#bl-chips").innerHTML=`<button type="button" class="tcat${!cur?" on":""}" data-a="">${E?"All branches":"كل الفروع"}</button>`+
    AREAS.map(a=>{const b=BRS.find(x=>x.area===a);return `<button type="button" class="tcat${cur===nrm(a)?" on":""}" data-a="${esc(a)}">${esc(E?b.area_en:a)}</button>`}).join("")};
  const rows=()=>BRS.filter(b=>(!qa.value.trim()||has(b.area+" "+b.area_en+" "+b.n+" "+b.en+" "+(b.k||""),qa.value))&&(!qd.value.trim()||has(b.address+" "+(b.address_en||"")+" "+b.n+" "+(b.k||""),qd.value)));
+ let sel=null; // the branch shown on the map next to the search
  const drawList=()=>{const r=rows(),E=isEn(),a=qa.value.trim(),d=qd.value.trim();
   $("#bl-count").textContent=E?`${r.length} branches`:`${r.length} فرع`;
-  blList.innerHTML=r.length?r.map(b=>`<li><a class="blrow" href="#branch-${b.id}">
+  if(r.length&&(!sel||!r.includes(sel)))sel=r[0];
+  blList.innerHTML=r.length?r.map(b=>`<li><a class="blrow${b===sel?" on":""}" href="#branch-${b.id}" data-id="${b.id}"${b===sel?' aria-current="true"':""}>
    <span class="blnum">${b.id}</span><span class="bltx"><b>${hl(nm(b),a||d)}</b><small>${hl(ad(b),d||a)}</small><span class="blph">${E?"Phone":"تليفون"}: <span dir="ltr">${esc(b.phone)}</span></span></span>
-   <span class="blgo">${E?"View →":"عرض ←"}</span></a></li>`).join(""):
+   <span class="blgo">${E?"On map":"على الخريطة"}</span></a></li>`).join(""):
    `<li class="tnone">${E?"No branch matches your search. Message us on WhatsApp and we'll help.":"مفيش فرع مطابق للبحث ده. كلّمنا على واتساب وهنساعدك."}</li>`;
-  drawChips()};
- const drawOne=b=>{const E=isEn();
-  $("#bl-one").innerHTML=`<div class="blcard"><div class="blinfo">
+  drawChips();drawOne(r.length?sel:null)};
+ let shown=null;
+ const drawOne=b=>{const E=isEn(),box=$("#bl-one");
+  if(!b){box.innerHTML=`<div class="blempty">${E?"No branch to show on the map.":"مفيش فرع يظهر على الخريطة."}</div>`;shown=null;return}
+  const key=b.id+(E?"e":"a");if(shown===key)return;shown=key;
+  box.innerHTML=`<iframe class="blmap" src="${gEmbed(b)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="${E?"Branch location map":"موقع الفرع على الخريطة"}"></iframe>
+   <div class="blinfo">
    <h2><span class="blnum">${b.id}</span>${esc(E?b.en+" Branch":"فرع "+b.n)}</h2>
    <div class="bllbl">${E?"Address":"العنوان"}</div><p class="blval">${esc(ad(b))}${b.gov&&!E?" – "+esc(b.gov):""}</p>
    <div class="bllbl">${E?"Phone":"التليفون"}</div><p class="blval" dir="ltr">${esc(b.phone)}</p>
    ${C.hours?`<div class="bllbl">${E?"Hours":"المواعيد"}</div><p class="blval">${esc(T(C.hours))}</p>`:""}
    <div class="blacts"><a class="btn red" href="${esc(gLink(b))}" target="_blank" rel="noopener">${E?"Open in Google Maps":"افتح في خرائط جوجل"}</a>
    <a class="btn ghost" href="tel:${tel(b.phone)}">${E?"Call":"اتصال"}</a>
-   <a class="btn wa" href="https://wa.me/2${esc(b.phone)}" target="_blank" rel="noopener">${E?"WhatsApp":"واتساب"}</a></div></div>
-   <iframe class="blmap" src="${gEmbed(b)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="${E?"Branch location map":"موقع الفرع على الخريطة"}"></iframe></div>`};
+   <a class="btn wa" href="https://wa.me/2${esc(b.phone)}" target="_blank" rel="noopener">${E?"WhatsApp":"واتساب"}</a></div></div>`};
+ const pick=(b,scroll)=>{sel=b;drawList();if(scroll&&innerWidth<=900)$("#bl-one").scrollIntoView({behavior:"smooth",block:"start"})};
  const route=()=>{const m=location.hash.match(/^#branch-(\d+)$/),b=m&&BRS.find(x=>x.id===+m[1]);
-  $("#bl-view-list").hidden=!!b;$("#bl-view-one").hidden=!b;
-  if(b){drawOne(b);window.scrollTo(0,0)}};
+  if(b){if(!rows().includes(b)){qa.value="";qd.value=""}pick(b,true)}};
  qa.addEventListener("input",drawList);qd.addEventListener("input",drawList);
+ blList.addEventListener("click",e=>{const r=e.target.closest(".blrow");if(!r)return;e.preventDefault();
+  const b=BRS.find(x=>x.id===+r.dataset.id);history.replaceState(null,"","#branch-"+b.id);pick(b,true)});
  $("#bl-chips").addEventListener("click",e=>{const c=e.target.closest(".tcat");if(!c)return;qa.value=c.dataset.a;drawList()});
  $("#bl-clear").onclick=()=>{qa.value="";qd.value="";drawList()};
  $("#bl-form").addEventListener("submit",e=>e.preventDefault());
- $("#bl-back").onclick=e=>{e.preventDefault();if(/^#branch-/.test(location.hash)&&history.length>1)history.back();else{history.replaceState(null,"",location.pathname+location.search);route()}};
  // links from the site search: branches.html?area=…  ?q=…  #branch-3
  try{const p=new URLSearchParams(location.search);if(p.get("area"))qa.value=p.get("area");if(p.get("q"))qd.value=p.get("q")}catch(e){}
  addEventListener("hashchange",route);
- const all=()=>{labels();drawList();route()};
+ const all=()=>{labels();shown=null;drawList();route()};
  onLangLate.push(all);
 }
 

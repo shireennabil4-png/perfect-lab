@@ -7,28 +7,17 @@
 <meta name="description" content="Perfect Lab branches and service areas.">
 <link rel="icon" href="assets/logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=202611130200">
+<link rel="stylesheet" href="assets/style.css?v=202611130215">
 </head>
 <body data-page="branches" data-title-ar="فروعنا – برفكت لاب">
 <div id="site-header"></div>
 <main>
 <section class="phead"><div class="wrap">
 <div class="crumb"><a href="index.html">الرئيسية</a> ‹ <span>فروعنا ومناطق الخدمة</span></div>
-<h1>فروعنا ومناطق الخدمة</h1><p>١٦ فرع في القاهرة والجيزة. ابحث بالمنطقة أو بالعنوان، واضغط على أي فرع لعرض عنوانه ومكانه على الخريطة.</p>
+<h1>فروعنا ومناطق الخدمة</h1><p>١٦ فرع في القاهرة والجيزة. ابحث بالمنطقة أو بالعنوان، والخريطة والعنوان بيظهروا جنب البحث على طول. اضغط على أي فرع من القايمة علشان تشوف مكانه.</p>
 </div></section>
 <section class="blsec"><div class="wrap">
-<div class="tlayout">
-<div class="tmain">
-<div id="bl-view-list">
-<p class="tcount" id="bl-count"></p>
-<ul class="bllist" id="bl-list"></ul>
-</div>
-<div id="bl-view-one" hidden>
-<a class="tback" id="bl-back" href="branches.html"></a>
-<div id="bl-one"></div>
-</div>
-</div>
-<aside class="tsidecol">
+<div class="bltop">
 <form class="tpanel" id="bl-form" autocomplete="off">
 <label class="tlab" for="bl-area" id="bl-area-l"></label>
 <div class="tfield"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><input id="bl-area" type="text" list="bl-areas"><datalist id="bl-areas"></datalist></div>
@@ -38,14 +27,17 @@
 <p class="tlab" id="bl-chips-t"></p>
 <div class="tcats" id="bl-chips"></div>
 </form>
-</aside>
+<div class="blsel" id="bl-one" aria-live="polite"></div>
+</div>
+<p class="tcount" id="bl-count"></p>
+<ul class="bllist" id="bl-list"></ul>
 </div>
 </div></section><section class="bvsec" aria-label="فيديو فروع برفكت لاب">
 <div class="vbox bvfull"><video controls muted autoplay loop playsinline preload="auto" data-vid="branches" aria-label="فيديو فروع برفكت لاب"></video></div>
 </section>
 </main>
 <div id="site-footer"></div>
-<script src="assets/config.js?v=202611130200"></script>
-<script src="assets/main.js?v=202611130200"></script>
+<script src="assets/config.js?v=202611130215"></script>
+<script src="assets/main.js?v=202611130215"></script>
 </body>
 </html>
