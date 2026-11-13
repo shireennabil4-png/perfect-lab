@@ -438,3 +438,10 @@ mark{background:#ffe3a3;color:inherit;border-radius:3px;padding:0 1px}
 .blside .tcount{margin:4px 2px 0}
 .blside .bllist{max-height:none}
 @media (max-width:900px){.bltop{grid-template-columns:1fr}.blside{order:-1}.blsel{position:static}.blsel .blmapwrap,.blsel.ov .blmapwrap{height:420px}.blsel:not(.ov) .blmapwrap{height:340px}}
+/* map stretches all the way to the right edge of the screen */
+@media (min-width:901px){
+ .bltop{grid-template-columns:minmax(0,1.6fr) minmax(320px,1fr)}
+ .blsel{margin-inline-start:calc(-1 * max(20px, (100vw - 1120px) / 2 + 20px));border-start-start-radius:0;border-end-start-radius:0;border-inline-start:0}
+ .blsel .blmapwrap,.blsel.ov .blmapwrap{height:calc(100vh - var(--hh,140px) - 40px);max-height:none}
+}
+.blsec{overflow-x:clip}
