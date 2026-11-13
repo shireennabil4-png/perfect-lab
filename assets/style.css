@@ -458,3 +458,10 @@ mark{background:#ffe3a3;color:inherit;border-radius:3px;padding:0 1px}
 @media (min-width:901px){
  .blside{margin-inline-end:calc(-1 * max(20px, (100vw - 1120px) / 2 + 20px) + 16px)}
 }
+@media (min-width:901px){
+ .blside{margin-inline-end:calc(-1 * max(20px, (100vw - 1120px) / 2 + 20px))}
+ .blside .tpanel{border-start-end-radius:0;border-end-end-radius:0;border-inline-end:0}
+ .blside .tcount{padding-inline-end:20px}
+ .blside .bllist{padding-inline-end:0}
+ .blside .blrow{border-start-end-radius:0;border-end-end-radius:0;border-inline-end:0}
+}
