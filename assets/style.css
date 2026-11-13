@@ -454,3 +454,7 @@ mark{background:#ffe3a3;color:inherit;border-radius:3px;padding:0 1px}
 }
 .blside .bllist{gap:12px}
 .blside .blrow{box-shadow:0 4px 14px rgba(11,79,104,.08)}
+/* left part (search + branch boxes) stretches to the left edge of the screen */
+@media (min-width:901px){
+ .blside{margin-inline-end:calc(-1 * max(20px, (100vw - 1120px) / 2 + 20px) + 16px)}
+}
