@@ -169,16 +169,13 @@ if(blList&&C.branches){
  const hl=(text,q)=>{const ws=nrm(q).split(" ").filter(Boolean);if(!ws.length)return esc(text);
   return String(text).split(/(\s+|–|,|،)/).map(tok=>{const n=nrm(tok);return n&&ws.some(w=>n.includes(w))?`<mark>${esc(tok)}</mark>`:esc(tok)}).join("")};
  const labels=()=>{const E=isEn();
-  $("#bl-area-l").textContent=E?"Search by area":"ابحث باسم المنطقة";
+  $("#bl-area-l").textContent=E?"Search by branch":"ابحث باسم الفرع";
   $("#bl-addr-l").textContent=E?"Search by address":"ابحث بالعنوان";
-  qa.placeholder=E?"e.g. Maadi, Helwan, October…":"مثلاً: المعادي، حلوان، أكتوبر…";
+  qa.placeholder=E?"Branch name, e.g. Faisal, Maadi…":"اسم الفرع، مثلاً: فيصل، المعادي…";
   qd.placeholder=E?"Street, square or landmark…":"اسم شارع، ميدان، علامة مميزة…";
   $("#bl-clear").textContent=E?"Clear search":"مسح البحث";
-  $("#bl-chips-t").textContent=E?"Areas":"المناطق";
-  $("#bl-areas").innerHTML=AREAS.map(a=>`<option value="${esc(a)}">`).join("");
+  $("#bl-areas").innerHTML=BRS.map(b=>`<option value="${esc(nm(b))}">`).join("");
  };
- const drawChips=()=>{const cur=nrm(qa.value),E=isEn();
-  $("#bl-chips").innerHTML=AREAS.map(a=>{const b=BRS.find(x=>x.area===a);return `<button type="button" class="tcat${cur===nrm(a)?" on":""}" data-a="${esc(a)}">${esc(E?b.area_en:a)}</button>`}).join("")};
  const rows=()=>BRS.filter(b=>(!qa.value.trim()||has(b.area+" "+b.area_en+" "+b.n+" "+b.en+" "+(b.k||""),qa.value))&&(!qd.value.trim()||has(b.address+" "+(b.address_en||"")+" "+b.n+" "+(b.k||""),qd.value)));
  let sel=null; // null = overview map of all branches; otherwise the chosen branch
  const box=$("#bl-one");
@@ -202,11 +199,11 @@ if(blList&&C.branches){
   const searching=!!(a||d);
   if(sel&&searching&&!r.includes(sel))sel=null;
   $("#bl-count").textContent=searching?(E?`${r.length} branches`:`${r.length} فرع`):"";
-  blList.innerHTML=!searching?`<li class="blwait">${E?"🔍 Type an area or address above to see the matching branches.":"🔍 اكتب اسم المنطقة أو العنوان في البحث علشان تظهرلك الفروع."}</li>`:r.length?r.map(b=>`<li><a class="blrow${b===sel?" on":""}" href="#branch-${b.id}" data-id="${b.id}"${b===sel?' aria-current="true"':""}>
+  blList.innerHTML=!searching?`<li class="blwait">${E?"🔍 Search by branch name or address to see the matching branches.":"🔍 ابحث باسم الفرع أو بالعنوان علشان تظهرلك الفروع."}</li>`:r.length?r.map(b=>`<li><a class="blrow${b===sel?" on":""}" href="#branch-${b.id}" data-id="${b.id}"${b===sel?' aria-current="true"':""}>
    <span class="blnum">${b.id}</span><span class="bltx"><b>${hl(nm(b),a||d)}</b><small>${hl(ad(b),d||a)}</small><span class="blph">${E?"Phone":"تليفون"}: <span dir="ltr">${esc(b.phone)}</span></span></span>
    <span class="blgo">${E?"On map":"على الخريطة"}</span></a></li>`).join(""):
    `<li class="tnone">${E?"No branch matches your search. Message us on WhatsApp and we'll help.":"مفيش فرع مطابق للبحث ده. كلّمنا على واتساب وهنساعدك."}</li>`;
-  drawChips();drawOne(sel,r)};
+  drawOne(sel,r)};
  let shown=null;
  const drawOne=(b,r)=>{const E=isEn();
   if(!b){ // overview: red pins for every branch (or for the search results); no branch details until one is chosen
@@ -233,7 +230,6 @@ if(blList&&C.branches){
  qa.addEventListener("input",drawList);qd.addEventListener("input",drawList);
  blList.addEventListener("click",e=>{const r=e.target.closest(".blrow");if(!r)return;e.preventDefault();
   const b=BRS.find(x=>x.id===+r.dataset.id);history.replaceState(null,"","#branch-"+b.id);pick(b,true)});
- $("#bl-chips").addEventListener("click",e=>{const c=e.target.closest(".tcat");if(!c)return;qa.value=c.dataset.a;drawList()});
  $("#bl-clear").onclick=()=>{qa.value="";qd.value="";sel=null;history.replaceState(null,"",location.pathname+location.search);drawList()};
  $("#bl-form").addEventListener("submit",e=>e.preventDefault());
  // links from the site search: branches.html?area=…  ?q=…  #branch-3

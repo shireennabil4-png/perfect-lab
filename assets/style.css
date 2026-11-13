@@ -427,3 +427,14 @@ mark{background:#ffe3a3;color:inherit;border-radius:3px;padding:0 1px}
 .blsel.ov .blinfo{display:none}
 .blsel.ov .blmapwrap{min-height:520px}
 .blwait{list-style:none;text-align:center;color:var(--muted);font-weight:700;background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:22px}
+
+/* map = right half, searches + results = left half */
+.bltop{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}
+.blsel{position:sticky;top:calc(var(--hh,140px) + 16px);grid-template-columns:1fr;min-height:0}
+.blsel .blmapwrap,.blsel.ov .blmapwrap{min-height:0;height:calc(100vh - var(--hh,140px) - 48px);max-height:760px}
+.blsel:not(.ov) .blmapwrap{height:clamp(300px,42vh,420px)}
+.blsel .blinfo{border-inline-start:0;border-top:1px solid var(--line)}
+.blside{display:grid;gap:14px;align-content:start}
+.blside .tcount{margin:4px 2px 0}
+.blside .bllist{max-height:none}
+@media (max-width:900px){.bltop{grid-template-columns:1fr}.blside{order:-1}.blsel{position:static}.blsel .blmapwrap,.blsel.ov .blmapwrap{height:420px}.blsel:not(.ov) .blmapwrap{height:340px}}
