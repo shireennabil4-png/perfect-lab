@@ -198,8 +198,8 @@ if(blList&&C.branches){
  const drawList=()=>{const r=rows(),E=isEn(),a=qa.value.trim(),d=qd.value.trim();
   const searching=!!(a||d);
   if(sel&&searching&&!r.includes(sel))sel=null;
-  $("#bl-count").textContent=searching?(E?`${r.length} branches`:`${r.length} فرع`):"";
-  blList.innerHTML=!searching?`<li class="blwait">${E?"🔍 Search by branch name or address to see the matching branches.":"🔍 ابحث باسم الفرع أو بالعنوان علشان تظهرلك الفروع."}</li>`:r.length?r.map(b=>`<li><a class="blrow${b===sel?" on":""}" href="#branch-${b.id}" data-id="${b.id}"${b===sel?' aria-current="true"':""}>
+  $("#bl-count").textContent=searching?(E?`${r.length} matching branches`:`${r.length} فرع مطابق للبحث`):(E?`All branches (${r.length})`:`كل الفروع (${r.length})`);
+  blList.innerHTML=r.length?r.map(b=>`<li><a class="blrow${b===sel?" on":""}" href="#branch-${b.id}" data-id="${b.id}"${b===sel?' aria-current="true"':""}>
    <span class="blnum">${b.id}</span><span class="bltx"><b>${hl(nm(b),a||d)}</b><small>${hl(ad(b),d||a)}</small><span class="blph">${E?"Phone":"تليفون"}: <span dir="ltr">${esc(b.phone)}</span></span></span>
    <span class="blgo">${E?"On map":"على الخريطة"}</span></a></li>`).join(""):
    `<li class="tnone">${E?"No branch matches your search. Message us on WhatsApp and we'll help.":"مفيش فرع مطابق للبحث ده. كلّمنا على واتساب وهنساعدك."}</li>`;
