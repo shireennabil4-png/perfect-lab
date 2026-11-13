@@ -163,8 +163,8 @@ if(blList&&C.branches){
  const nm=b=>isEn()?b.en:b.n,ar=b=>isEn()?b.area_en:b.area,ad=b=>isEn()&&b.address_en?b.address_en:b.address;
  const AREAS=[...new Set(BRS.map(b=>b.area))];
  const mapQ=b=>`${b.address.replace(/–/g,"،")}، ${b.gov||""}، مصر`;
- const gLink=b=>b.map||`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQ(b))}`;
- const gEmbed=b=>`https://maps.google.com/maps?q=${encodeURIComponent(b.map_q||mapQ(b))}&hl=${isEn()?"en":"ar"}&z=16&output=embed`;
+ const gLink=b=>b.map||`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(b.map_q||mapQ(b))}`;
+ const gEmbed=b=>`https://maps.google.com/maps?q=${encodeURIComponent(b.map_q||mapQ(b))}&hl=${isEn()?"en":"ar"}&z=17&output=embed`;
  const tel=p=>"+2"+p;
  const hl=(text,q)=>{const ws=nrm(q).split(" ").filter(Boolean);if(!ws.length)return esc(text);
   return String(text).split(/(\s+|–|,|،)/).map(tok=>{const n=nrm(tok);return n&&ws.some(w=>n.includes(w))?`<mark>${esc(tok)}</mark>`:esc(tok)}).join("")};
