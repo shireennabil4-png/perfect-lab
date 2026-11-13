@@ -312,6 +312,7 @@ if(tlist&&typeof TESTS!=="undefined"){
   tlist.innerHTML=rows.length?rows.map(t=>`<article class="tcard trow"><a class="tlink" href="#test-${slug(t.code)}">
    <span class="tcode" dir="ltr">${esc(t.code)}</span><span class="ttx"><h3>${esc(E?t.en:t.ar)}</h3><small>${esc(E?t.ar:t.en)}</small>
    <span class="tsum">${esc(E?t.we:t.w)}</span><span class="tbadges">${badges(t)}</span></span></a>
+   <div class="tprep f-${t.f}"><b>${E?"🧪 How to prepare":"🧪 التحضير للتحليل"}</b><p>${esc(E?t.pen:t.par)}</p></div>
    <div class="tside">${cartBtn(t)}<a class="tmore" href="#test-${slug(t.code)}">${E?"Details →":"التفاصيل ←"}</a></div></article>`).join(""):
    `<p class="tnone">${E?"No test matches your search. Message us on WhatsApp and we'll help.":"مفيش تحليل بالاسم ده. كلّمنا على واتساب وهنساعدك."}</p>`;
   $("#tcount").textContent=E?`${rows.length} tests`:`${rows.length} تحليل`};

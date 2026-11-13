@@ -401,3 +401,12 @@ mark{background:#ffe3a3;color:inherit;border-radius:3px;padding:0 1px}
 .bltop+.tcount{margin-top:0}
 @media (max-width:1180px){.blsel{grid-template-columns:1fr}.blsel .blmap{min-height:340px}.blsel .blinfo{border-inline-start:0;border-top:1px solid var(--line)}}
 @media (max-width:900px){.bltop{grid-template-columns:1fr}.blsel{scroll-margin-top:calc(var(--hh,140px) + 12px)}}
+
+/* ===== Tests list: preparation shown next to each test ===== */
+.tprep{flex:0 0 280px;padding:14px 16px;border-inline-start:1px solid var(--line);background:#f4faf6;font-size:.88rem;line-height:1.7}
+.tprep b{display:block;color:#0b6b45;font-size:.9rem;margin-bottom:4px}
+.tprep p{margin:0;color:var(--text)}
+.tprep.f-f4,.tprep.f-f6,.tprep.f-f8,.tprep.f-f9{background:#fff8ef}.tprep.f-f4 b,.tprep.f-f6 b,.tprep.f-f8 b,.tprep.f-f9 b{color:#9a4a00}
+.tprep.f-special{background:#f6f2fd}.tprep.f-special b{color:#5b3aa8}
+@media (max-width:1180px){.tmain .tcard.trow{flex-wrap:wrap}.tmain .trow .tlink{flex:1 1 300px}.tmain .trow .tprep{order:3;flex:1 1 100%;border-inline-start:0;border-top:1px solid var(--line)}}
+@media (max-width:900px){.tmain .tcard.trow{flex-wrap:nowrap}.tmain .trow .tlink,.tmain .trow .tprep,.tmain .trow .tside{flex:none;width:100%}.tmain .trow .tprep{order:0}}
