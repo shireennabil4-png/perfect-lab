@@ -178,8 +178,7 @@ if(blList&&C.branches){
   $("#bl-areas").innerHTML=AREAS.map(a=>`<option value="${esc(a)}">`).join("");
  };
  const drawChips=()=>{const cur=nrm(qa.value),E=isEn();
-  $("#bl-chips").innerHTML=`<button type="button" class="tcat${!cur?" on":""}" data-a="">${E?"All branches":"كل الفروع"}</button>`+
-   AREAS.map(a=>{const b=BRS.find(x=>x.area===a);return `<button type="button" class="tcat${cur===nrm(a)?" on":""}" data-a="${esc(a)}">${esc(E?b.area_en:a)}</button>`}).join("")};
+  $("#bl-chips").innerHTML=AREAS.map(a=>{const b=BRS.find(x=>x.area===a);return `<button type="button" class="tcat${cur===nrm(a)?" on":""}" data-a="${esc(a)}">${esc(E?b.area_en:a)}</button>`}).join("")};
  const rows=()=>BRS.filter(b=>(!qa.value.trim()||has(b.area+" "+b.area_en+" "+b.n+" "+b.en+" "+(b.k||""),qa.value))&&(!qd.value.trim()||has(b.address+" "+(b.address_en||"")+" "+b.n+" "+(b.k||""),qd.value)));
  let sel=null; // null = overview map of all branches; otherwise the chosen branch
  const box=$("#bl-one");
@@ -200,24 +199,21 @@ if(blList&&C.branches){
   sc.onerror=()=>{lfail=true;lEl.innerHTML=`<div class="mapload">${isEn()?"The map could not be loaded. Choose a branch from the list.":"تعذر تحميل الخريطة. اختار فرع من القايمة."}</div>`};
   document.head.appendChild(sc)})();
  const drawList=()=>{const r=rows(),E=isEn(),a=qa.value.trim(),d=qd.value.trim();
-  $("#bl-count").textContent=E?`${r.length} branches`:`${r.length} فرع`;
-  if(sel&&!r.includes(sel))sel=null;
-  blList.innerHTML=r.length?r.map(b=>`<li><a class="blrow${b===sel?" on":""}" href="#branch-${b.id}" data-id="${b.id}"${b===sel?' aria-current="true"':""}>
+  const searching=!!(a||d);
+  if(sel&&searching&&!r.includes(sel))sel=null;
+  $("#bl-count").textContent=searching?(E?`${r.length} branches`:`${r.length} فرع`):"";
+  blList.innerHTML=!searching?`<li class="blwait">${E?"🔍 Type an area or address above to see the matching branches.":"🔍 اكتب اسم المنطقة أو العنوان في البحث علشان تظهرلك الفروع."}</li>`:r.length?r.map(b=>`<li><a class="blrow${b===sel?" on":""}" href="#branch-${b.id}" data-id="${b.id}"${b===sel?' aria-current="true"':""}>
    <span class="blnum">${b.id}</span><span class="bltx"><b>${hl(nm(b),a||d)}</b><small>${hl(ad(b),d||a)}</small><span class="blph">${E?"Phone":"تليفون"}: <span dir="ltr">${esc(b.phone)}</span></span></span>
    <span class="blgo">${E?"On map":"على الخريطة"}</span></a></li>`).join(""):
    `<li class="tnone">${E?"No branch matches your search. Message us on WhatsApp and we'll help.":"مفيش فرع مطابق للبحث ده. كلّمنا على واتساب وهنساعدك."}</li>`;
   drawChips();drawOne(sel,r)};
  let shown=null;
  const drawOne=(b,r)=>{const E=isEn();
-  if(!b){ // overview: every branch (or every search result) on one map
-   gEl.hidden=true;lEl.hidden=false;shown=null;
-   const ml=lEl.querySelector(".mapload");if(lmap){lmap.invalidateSize();fitTo(r)}else if(ml)ml.textContent=lfail?(E?"The map could not be loaded. Choose a branch from the list.":"تعذر تحميل الخريطة. اختار فرع من القايمة."):(E?"Loading the map…":"جاري تحميل الخريطة…");
-   const filtered=r.length!==BRS.length;
-   info.innerHTML=`<h2><span class="blnum">${r.length}</span>${filtered?(E?"Matching branches":"فروع مطابقة للبحث"):(E?"All Perfect Lab branches":"كل فروع برفكت لاب")}</h2>
-    <p class="blhint">${r.length?(E?"Tap a pin on the map or a branch in the list to see its address, phone and exact location.":"اضغط على أي علامة في الخريطة أو أي فرع من القايمة علشان تشوف العنوان والتليفون والمكان بالظبط."):(E?"No branch matches your search.":"مفيش فرع مطابق للبحث.")}</p>
-    <ul class="blmini">${r.slice(0,8).map(x=>`<li><a href="#branch-${x.id}" data-id="${x.id}"><span class="pinmini" aria-hidden="true"></span>${esc(E?x.en+" Branch":"فرع "+x.n)}</a></li>`).join("")}</ul>
-    ${r.length>8?`<p class="blhint">${E?`+ ${r.length-8} more in the list below`:`+ ${r.length-8} فروع تانية في القايمة تحت`}</p>`:""}`;
+  if(!b){ // overview: red pins for every branch (or for the search results); no branch details until one is chosen
+   gEl.hidden=true;lEl.hidden=false;shown=null;box.classList.add("ov");info.innerHTML="";
+   const ml=lEl.querySelector(".mapload");if(lmap){lmap.invalidateSize();fitTo(r)}else if(ml)ml.textContent=lfail?(E?"The map could not be loaded. Search for a branch instead.":"تعذر تحميل الخريطة. ابحث عن الفرع من البحث."):(E?"Loading the map…":"جاري تحميل الخريطة…");
    return}
+  box.classList.remove("ov");
   const key=b.id+(E?"e":"a");if(shown===key)return;shown=key;
   lEl.hidden=true;gEl.hidden=false;gEl.src=gEmbed(b);gEl.title=E?"Branch location map":"موقع الفرع على الخريطة";
   info.innerHTML=`<button type="button" class="tback blall" id="bl-all">${E?"← All branches on the map":"→ كل الفروع على الخريطة"}</button>
