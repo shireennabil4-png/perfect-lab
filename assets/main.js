@@ -181,36 +181,64 @@ if(blList&&C.branches){
   $("#bl-chips").innerHTML=`<button type="button" class="tcat${!cur?" on":""}" data-a="">${E?"All branches":"كل الفروع"}</button>`+
    AREAS.map(a=>{const b=BRS.find(x=>x.area===a);return `<button type="button" class="tcat${cur===nrm(a)?" on":""}" data-a="${esc(a)}">${esc(E?b.area_en:a)}</button>`}).join("")};
  const rows=()=>BRS.filter(b=>(!qa.value.trim()||has(b.area+" "+b.area_en+" "+b.n+" "+b.en+" "+(b.k||""),qa.value))&&(!qd.value.trim()||has(b.address+" "+(b.address_en||"")+" "+b.n+" "+(b.k||""),qd.value)));
- let sel=null; // the branch shown on the map next to the search
+ let sel=null; // null = overview map of all branches; otherwise the chosen branch
+ const box=$("#bl-one");
+ box.innerHTML=`<div class="blmapwrap"><div class="blmap" id="bl-lmap" role="region"><div class="mapload"></div></div><iframe class="blmap" id="bl-gmap" hidden loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div><div class="blinfo" id="bl-info"></div>`;
+ const lEl=$("#bl-lmap"),gEl=$("#bl-gmap"),info=$("#bl-info");
+ let lmap=null,lmarks={},lfail=false;
+ const fitTo=r=>{if(!lmap)return;const pts=r.filter(b=>b.lat&&b.lng).map(b=>[b.lat,b.lng]);
+  Object.entries(lmarks).forEach(([id,m])=>{const on=r.some(b=>b.id===+id);if(on&&!lmap.hasLayer(m))m.addTo(lmap);if(!on&&lmap.hasLayer(m))lmap.removeLayer(m)});
+  if(pts.length===1)lmap.setView(pts[0],14);else if(pts.length)lmap.fitBounds(L.latLngBounds(pts),{padding:[36,36]})};
+ (()=>{const css=document.createElement("link");css.rel="stylesheet";css.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";document.head.appendChild(css);
+  const sc=document.createElement("script");sc.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+  sc.onload=()=>{if(!window.L||!L.map){sc.onerror();return}
+   lEl.innerHTML="";lmap=L.map(lEl,{scrollWheelZoom:false});
+   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(lmap);
+   const icon=L.divIcon({className:"pinwrap",html:'<span class="pin"></span>',iconSize:[30,40],iconAnchor:[15,40],popupAnchor:[0,-36]});
+   BRS.filter(b=>b.lat&&b.lng).forEach(b=>{lmarks[b.id]=L.marker([b.lat,b.lng],{icon,title:nm(b)}).addTo(lmap).on("click",()=>{history.replaceState(null,"","#branch-"+b.id);pick(b,true)})});
+   fitTo(rows())};
+  sc.onerror=()=>{lfail=true;lEl.innerHTML=`<div class="mapload">${isEn()?"The map could not be loaded. Choose a branch from the list.":"تعذر تحميل الخريطة. اختار فرع من القايمة."}</div>`};
+  document.head.appendChild(sc)})();
  const drawList=()=>{const r=rows(),E=isEn(),a=qa.value.trim(),d=qd.value.trim();
   $("#bl-count").textContent=E?`${r.length} branches`:`${r.length} فرع`;
-  if(r.length&&(!sel||!r.includes(sel)))sel=r[0];
+  if(sel&&!r.includes(sel))sel=null;
   blList.innerHTML=r.length?r.map(b=>`<li><a class="blrow${b===sel?" on":""}" href="#branch-${b.id}" data-id="${b.id}"${b===sel?' aria-current="true"':""}>
    <span class="blnum">${b.id}</span><span class="bltx"><b>${hl(nm(b),a||d)}</b><small>${hl(ad(b),d||a)}</small><span class="blph">${E?"Phone":"تليفون"}: <span dir="ltr">${esc(b.phone)}</span></span></span>
    <span class="blgo">${E?"On map":"على الخريطة"}</span></a></li>`).join(""):
    `<li class="tnone">${E?"No branch matches your search. Message us on WhatsApp and we'll help.":"مفيش فرع مطابق للبحث ده. كلّمنا على واتساب وهنساعدك."}</li>`;
-  drawChips();drawOne(r.length?sel:null)};
+  drawChips();drawOne(sel,r)};
  let shown=null;
- const drawOne=b=>{const E=isEn(),box=$("#bl-one");
-  if(!b){box.innerHTML=`<div class="blempty">${E?"No branch to show on the map.":"مفيش فرع يظهر على الخريطة."}</div>`;shown=null;return}
+ const drawOne=(b,r)=>{const E=isEn();
+  if(!b){ // overview: every branch (or every search result) on one map
+   gEl.hidden=true;lEl.hidden=false;shown=null;
+   const ml=lEl.querySelector(".mapload");if(lmap){lmap.invalidateSize();fitTo(r)}else if(ml)ml.textContent=lfail?(E?"The map could not be loaded. Choose a branch from the list.":"تعذر تحميل الخريطة. اختار فرع من القايمة."):(E?"Loading the map…":"جاري تحميل الخريطة…");
+   const filtered=r.length!==BRS.length;
+   info.innerHTML=`<h2><span class="blnum">${r.length}</span>${filtered?(E?"Matching branches":"فروع مطابقة للبحث"):(E?"All Perfect Lab branches":"كل فروع برفكت لاب")}</h2>
+    <p class="blhint">${r.length?(E?"Tap a pin on the map or a branch in the list to see its address, phone and exact location.":"اضغط على أي علامة في الخريطة أو أي فرع من القايمة علشان تشوف العنوان والتليفون والمكان بالظبط."):(E?"No branch matches your search.":"مفيش فرع مطابق للبحث.")}</p>
+    <ul class="blmini">${r.slice(0,8).map(x=>`<li><a href="#branch-${x.id}" data-id="${x.id}"><span class="pinmini" aria-hidden="true"></span>${esc(E?x.en+" Branch":"فرع "+x.n)}</a></li>`).join("")}</ul>
+    ${r.length>8?`<p class="blhint">${E?`+ ${r.length-8} more in the list below`:`+ ${r.length-8} فروع تانية في القايمة تحت`}</p>`:""}`;
+   return}
   const key=b.id+(E?"e":"a");if(shown===key)return;shown=key;
-  box.innerHTML=`<iframe class="blmap" src="${gEmbed(b)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="${E?"Branch location map":"موقع الفرع على الخريطة"}"></iframe>
-   <div class="blinfo">
+  lEl.hidden=true;gEl.hidden=false;gEl.src=gEmbed(b);gEl.title=E?"Branch location map":"موقع الفرع على الخريطة";
+  info.innerHTML=`<button type="button" class="tback blall" id="bl-all">${E?"← All branches on the map":"→ كل الفروع على الخريطة"}</button>
    <h2><span class="blnum">${b.id}</span>${esc(E?b.en+" Branch":"فرع "+b.n)}</h2>
    <div class="bllbl">${E?"Address":"العنوان"}</div><p class="blval">${esc(ad(b))}${b.gov&&!E?" – "+esc(b.gov):""}</p>
    <div class="bllbl">${E?"Phone":"التليفون"}</div><p class="blval" dir="ltr">${esc(b.phone)}</p>
    ${C.hours?`<div class="bllbl">${E?"Hours":"المواعيد"}</div><p class="blval">${esc(T(C.hours))}</p>`:""}
    <div class="blacts"><a class="btn red" href="${esc(gLink(b))}" target="_blank" rel="noopener">${E?"Open in Google Maps":"افتح في خرائط جوجل"}</a>
    <a class="btn ghost" href="tel:${tel(b.phone)}">${E?"Call":"اتصال"}</a>
-   <a class="btn wa" href="https://wa.me/2${esc(b.phone)}" target="_blank" rel="noopener">${E?"WhatsApp":"واتساب"}</a></div></div>`};
- const pick=(b,scroll)=>{sel=b;drawList();if(scroll&&innerWidth<=900)$("#bl-one").scrollIntoView({behavior:"smooth",block:"start"})};
+   <a class="btn wa" href="https://wa.me/2${esc(b.phone)}" target="_blank" rel="noopener">${E?"WhatsApp":"واتساب"}</a></div>`};
+ const pick=(b,scroll)=>{sel=b;drawList();if(scroll&&innerWidth<=900)box.scrollIntoView({behavior:"smooth",block:"start"})};
+ const showAll=()=>{history.replaceState(null,"",location.pathname+location.search);pick(null,false)};
+ info.addEventListener("click",e=>{if(e.target.closest("#bl-all")){showAll();return}
+  const m=e.target.closest(".blmini a");if(m){e.preventDefault();const b=BRS.find(x=>x.id===+m.dataset.id);history.replaceState(null,"","#branch-"+b.id);pick(b,false)}});
  const route=()=>{const m=location.hash.match(/^#branch-(\d+)$/),b=m&&BRS.find(x=>x.id===+m[1]);
-  if(b){if(!rows().includes(b)){qa.value="";qd.value=""}pick(b,true)}};
+  if(b){if(!rows().includes(b)){qa.value="";qd.value=""}pick(b,true)}else if(sel)pick(null,false)};
  qa.addEventListener("input",drawList);qd.addEventListener("input",drawList);
  blList.addEventListener("click",e=>{const r=e.target.closest(".blrow");if(!r)return;e.preventDefault();
   const b=BRS.find(x=>x.id===+r.dataset.id);history.replaceState(null,"","#branch-"+b.id);pick(b,true)});
  $("#bl-chips").addEventListener("click",e=>{const c=e.target.closest(".tcat");if(!c)return;qa.value=c.dataset.a;drawList()});
- $("#bl-clear").onclick=()=>{qa.value="";qd.value="";drawList()};
+ $("#bl-clear").onclick=()=>{qa.value="";qd.value="";sel=null;history.replaceState(null,"",location.pathname+location.search);drawList()};
  $("#bl-form").addEventListener("submit",e=>e.preventDefault());
  // links from the site search: branches.html?area=…  ?q=…  #branch-3
  try{const p=new URLSearchParams(location.search);if(p.get("area"))qa.value=p.get("area");if(p.get("q"))qd.value=p.get("q")}catch(e){}
